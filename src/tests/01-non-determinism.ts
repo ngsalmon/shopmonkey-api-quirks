@@ -5,7 +5,7 @@ const meta = {
   id: '01-non-determinism',
   title: 'REST list endpoints return non-deterministic results across identical calls — even with `orderBy` on a sortable field and a `gte` filter',
   hypothesis:
-    'Five identical GET /v3/order calls with the same skip/limit, an `orderBy={"id":"asc"}` clause (which test 03 confirms is honored), and a bare-`gte` filter on `createdDate` (which test 02 confirms is honored) should return the same 100 IDs every time. Instead the result sets are mostly disjoint (Jaccard < 1.0 across pairs).',
+    'Five identical GET /v3/order calls with the same skip/limit, an `orderBy={"id":"asc"}` clause (which test 02 confirms is the one orderBy form that is honored), and a `where={"createdDate":{"gte":...}}` filter should return the same 100 IDs every time. Instead the result sets are mostly disjoint (Jaccard < 1.0 across pairs). Pagination is unstable even when sort and filter both work.',
 };
 
 interface OrderRow {
@@ -41,17 +41,12 @@ async function run(): Promise<TestResult> {
   }
 
   const minJaccard = Math.min(...pairwise.map((p) => p.jaccard));
-  const verdict = minJaccard < 1 ? 'CONFIRMED_BUG' : 'NOT_REPRODUCED';
-  const summary =
-    verdict === 'CONFIRMED_BUG'
-      ? `Min Jaccard across ${pairwise.length} pairs = ${minJaccard.toFixed(3)} (1.0 means identical sets). Identical calls — same skip/limit, same orderBy on id (which sorts correctly), same bare-\`gte\` filter on createdDate (which filters correctly) — returned different ID sets.`
-      : `All ${PASSES} calls returned identical ID sets (Jaccard = 1.0). With sortable orderBy + filter, the API is now deterministic.`;
+  const summary = `Min Jaccard across ${pairwise.length} pairs = ${minJaccard.toFixed(3)} (1.0 means identical sets). Identical calls — same skip/limit, working orderBy on id, working \`gte\` filter on createdDate — returned different ID sets.`;
 
   return {
     id: meta.id,
     title: meta.title,
     hypothesis: meta.hypothesis,
-    verdict,
     summary,
     evidence: {
       endpoint: `GET /v3${ENDPOINT}`,

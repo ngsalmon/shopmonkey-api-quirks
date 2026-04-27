@@ -1,47 +1,20 @@
 {
-  "generatedAt": "2026-04-27T22:06:16.806Z",
+  "generatedAt": "2026-04-27T22:35:45.468Z",
   "results": [
     {
       "id": "01-non-determinism",
       "title": "REST list endpoints return non-deterministic results across identical calls — even with `orderBy` on a sortable field and a `gte` filter",
-      "verdict": "CONFIRMED_BUG",
-      "summary": "Min Jaccard across 10 pairs = 0.000 (1.0 means identical sets). Identical calls — same skip/limit, same orderBy on id (which sorts correctly), same bare-`gte` filter on createdDate (which filters correctly) — returned different ID sets."
+      "summary": "Min Jaccard across 10 pairs = 0.000 (1.0 means identical sets). Identical calls — same skip/limit, working orderBy on id, working `gte` filter on createdDate — returned different ID sets."
     },
     {
-      "id": "02-where-range-operators",
-      "title": "MongoDB-style operators (`$gte`) silently ignored; bare operators (`gte`) honored",
-      "verdict": "CONFIRMED_BUG",
-      "summary": "`$gte` is silently dropped (filtered total 5725 = baseline 5725); bare `gte` correctly returns 0 rows for a far-future date. Doc page describes `where` only as type \"any\" with no examples, so partners can't tell which syntax is right."
+      "id": "02-orderby-and-collate",
+      "title": "`orderBy` is honored on `id` but ignored on `createdDate` and `updatedDate`",
+      "summary": "orderBy={\"id\":\"asc\"} produced 0/49 alphabetic inversions on UUIDs (effectively sorted). Same syntax on createdDate: ≥19/49 inversions across 8 encodings. On updatedDate: ≥21/49 inversions across 8 encodings. Neither date field is orderable. collate=true on createdDate: 25 inversions."
     },
     {
-      "id": "03-orderby-and-collate",
-      "title": "`orderBy` is honored on `id` but not on `createdDate`; `collate=true` does not change behavior",
-      "verdict": "CONFIRMED_BUG",
-      "summary": "orderBy={\"id\":\"asc\"} produced 2/49 alphabetic inversions on UUIDs (effectively sorted). Same syntax on createdDate produced ≥22/49 adjacent-pair inversions across all 8 encodings tested. createdDate is not orderable. collate=true: 24 inversions."
-    },
-    {
-      "id": "04-offset-vs-skip",
-      "title": "`offset` parameter silently ignored on /customer; `skip` works",
-      "verdict": "CONFIRMED_BUG",
-      "summary": "offset=0 vs offset=50 returned identical IDs (offset dropped). skip=0 vs skip=50 returned disjoint pages (skip works)."
-    },
-    {
-      "id": "05-limit-clamp",
+      "id": "03-limit-clamp",
       "title": "`limit` parameter silently clamped at 100",
-      "verdict": "CONFIRMED_BUG",
-      "summary": "Requested limit=500, received 100 rows (clamped to 100). No error, no warning."
-    },
-    {
-      "id": "06-payment-date-filter",
-      "title": "POST /integration/payment/search — `$gte` silently ignored, `gte` honored",
-      "verdict": "CONFIRMED_BUG",
-      "summary": "`$gte` is silently dropped (total 3359 = baseline 3359); bare `gte` correctly returns 0 for far-future and 221 for 2026-04-01T00:00:00Z. Same silent-ignore pattern as test 02."
-    },
-    {
-      "id": "07-subcontract-rename",
-      "title": "Subcontract field renamed: `wholesaleCostCents` no longer present; `costCents` is the actual key",
-      "verdict": "CONFIRMED_BUG",
-      "summary": "Scanned 7 subcontracts across 800 orders. costCents present on 7 (populated on 7). wholesaleCostCents present on 0 (populated on 0). retailCostCents populated on 7."
+      "summary": "Requested limit=500, received 100 rows (clamped to 100). No 4xx, no warning header."
     }
   ]
 }

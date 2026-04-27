@@ -1,0 +1,394 @@
+{
+  "id": "02-orderby-and-collate",
+  "title": "`orderBy` is honored on `id` but ignored on `createdDate` and `updatedDate`",
+  "hypothesis": "`orderBy` is honored on `id` (~1–5 of 49 inversions on UUIDs sorted lexically). The same syntax on `createdDate` and `updatedDate` produces ~20+ adjacent-pair inversions across 8 alternative encodings — random. So this is not a syntax issue: dates simply are not orderable through `GET /v3/order`. This matters for incremental sync, which would naturally want `updatedDate` ordering.",
+  "summary": "orderBy={\"id\":\"asc\"} produced 0/49 alphabetic inversions on UUIDs (effectively sorted). Same syntax on createdDate: ≥19/49 inversions across 8 encodings. On updatedDate: ≥21/49 inversions across 8 encodings. Neither date field is orderable. collate=true on createdDate: 25 inversions.",
+  "evidence": {
+    "endpoint": "GET /v3/order",
+    "idControl": {
+      "orderBy": {
+        "id": "asc"
+      },
+      "rows": 50,
+      "alphabeticInversions": 0
+    },
+    "createdDateVariants": [
+      {
+        "label": "object {createdDate:\"asc\"}",
+        "rows": 50,
+        "ascInv": 25,
+        "descInv": 24
+      },
+      {
+        "label": "object {createdDate:1}",
+        "rows": 50,
+        "ascInv": 28,
+        "descInv": 21
+      },
+      {
+        "label": "object {createdDate:\"ascending\"}",
+        "rows": 50,
+        "ascInv": 25,
+        "descInv": 24
+      },
+      {
+        "label": "string \"createdDate\"",
+        "rows": 50,
+        "ascInv": 26,
+        "descInv": 23
+      },
+      {
+        "label": "string \"-createdDate\"",
+        "rows": 50,
+        "ascInv": 26,
+        "descInv": 23
+      },
+      {
+        "label": "string \"createdDate asc\"",
+        "rows": 50,
+        "ascInv": 30,
+        "descInv": 19
+      },
+      {
+        "label": "array [{field,direction}]",
+        "rows": 50,
+        "ascInv": 21,
+        "descInv": 28
+      },
+      {
+        "label": "array [[\"createdDate\",\"ASC\"]]",
+        "rows": 50,
+        "ascInv": 25,
+        "descInv": 24
+      }
+    ],
+    "updatedDateVariants": [
+      {
+        "label": "object {updatedDate:\"asc\"}",
+        "rows": 50,
+        "ascInv": 25,
+        "descInv": 24
+      },
+      {
+        "label": "object {updatedDate:1}",
+        "rows": 50,
+        "ascInv": 21,
+        "descInv": 28
+      },
+      {
+        "label": "object {updatedDate:\"ascending\"}",
+        "rows": 50,
+        "ascInv": 23,
+        "descInv": 25
+      },
+      {
+        "label": "string \"updatedDate\"",
+        "rows": 50,
+        "ascInv": 25,
+        "descInv": 23
+      },
+      {
+        "label": "string \"-updatedDate\"",
+        "rows": 50,
+        "ascInv": 23,
+        "descInv": 26
+      },
+      {
+        "label": "string \"updatedDate asc\"",
+        "rows": 50,
+        "ascInv": 25,
+        "descInv": 24
+      },
+      {
+        "label": "array [{field,direction}]",
+        "rows": 50,
+        "ascInv": 24,
+        "descInv": 25
+      },
+      {
+        "label": "array [[\"updatedDate\",\"ASC\"]]",
+        "rows": 50,
+        "ascInv": 24,
+        "descInv": 23
+      }
+    ],
+    "collateOnCreatedDate": {
+      "rows": 50,
+      "ascInversions": 25
+    }
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "{\"createdDate\":\"asc\"}"
+      },
+      "status": 200,
+      "durationMs": 265,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "{\"createdDate\":1}"
+      },
+      "status": 200,
+      "durationMs": 287,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "{\"createdDate\":\"ascending\"}"
+      },
+      "status": 200,
+      "durationMs": 234,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "createdDate"
+      },
+      "status": 200,
+      "durationMs": 237,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "-createdDate"
+      },
+      "status": 200,
+      "durationMs": 215,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "createdDate asc"
+      },
+      "status": 200,
+      "durationMs": 204,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "[{\"field\":\"createdDate\",\"direction\":\"asc\"}]"
+      },
+      "status": 200,
+      "durationMs": 233,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "[[\"createdDate\",\"ASC\"]]"
+      },
+      "status": 200,
+      "durationMs": 253,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "{\"updatedDate\":\"asc\"}"
+      },
+      "status": 200,
+      "durationMs": 201,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "{\"updatedDate\":1}"
+      },
+      "status": 200,
+      "durationMs": 244,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "{\"updatedDate\":\"ascending\"}"
+      },
+      "status": 200,
+      "durationMs": 260,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "updatedDate"
+      },
+      "status": 200,
+      "durationMs": 248,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "-updatedDate"
+      },
+      "status": 200,
+      "durationMs": 258,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "updatedDate asc"
+      },
+      "status": 200,
+      "durationMs": 237,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "[{\"field\":\"updatedDate\",\"direction\":\"asc\"}]"
+      },
+      "status": 200,
+      "durationMs": 312,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "[[\"updatedDate\",\"ASC\"]]"
+      },
+      "status": 200,
+      "durationMs": 245,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "{\"id\":\"asc\"}"
+      },
+      "status": 200,
+      "durationMs": 242,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "{\"createdDate\":\"asc\"}",
+        "collate": "true"
+      },
+      "status": 200,
+      "durationMs": 199,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    }
+  ],
+  "capturedAt": "2026-04-27T22:35:45.122Z"
+}
