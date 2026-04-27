@@ -1,9 +1,9 @@
 {
-  "id": "08-payment-date-filter",
+  "id": "06-payment-date-filter",
   "title": "POST /integration/payment/search ignores `createdDate.$gte` filter",
   "hypothesis": "Posting where={createdDate:{$gte:\"2099-01-01\"}} should return zero payments. Instead the endpoint returns the same payments as an unfiltered search.",
   "verdict": "CONFIRMED_BUG",
-  "summary": "Future-date filter returned 100 rows (meta.total=3358); baseline returned 100 (meta.total=3358). Filter ignored.",
+  "summary": "Future-date filter returned 100 rows (meta.total=3359); baseline returned 100 (meta.total=3359). Filter ignored.",
   "evidence": {
     "endpoint": "POST /v3/integration/payment/search",
     "baseline": {
@@ -11,7 +11,7 @@
         "limit": 100
       },
       "dataLength": 100,
-      "metaTotal": 3358
+      "metaTotal": 3359
     },
     "filtered": {
       "body": {
@@ -23,7 +23,7 @@
         }
       },
       "dataLength": 100,
-      "metaTotal": 3358
+      "metaTotal": 3359
     }
   },
   "requests": [
@@ -34,10 +34,10 @@
         "limit": 100
       },
       "status": 200,
-      "durationMs": 198,
+      "durationMs": 199,
       "responseSummary": {
         "dataLength": 100,
-        "metaTotal": 3358,
+        "metaTotal": 3359,
         "metaHasMore": true
       }
     },
@@ -53,13 +53,13 @@
         }
       },
       "status": 200,
-      "durationMs": 210,
+      "durationMs": 194,
       "responseSummary": {
         "dataLength": 100,
-        "metaTotal": 3358,
+        "metaTotal": 3359,
         "metaHasMore": true
       }
     }
   ],
-  "capturedAt": "2026-04-27T20:57:52.085Z"
+  "capturedAt": "2026-04-27T21:37:30.579Z"
 }

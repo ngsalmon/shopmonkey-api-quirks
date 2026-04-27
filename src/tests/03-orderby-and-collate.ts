@@ -2,7 +2,7 @@ import { call, type ListResponse } from '../client.js';
 import type { TestModule, TestResult } from '../runner.js';
 
 const meta = {
-  id: '04-orderby-and-collate',
+  id: '03-orderby-and-collate',
   title: '`orderBy` accepted but does not produce monotonic ordering; `collate=true` does not stabilize',
   hypothesis:
     'GET /v3/order with orderBy={"createdDate":"asc"} should return records sorted ascending by createdDate. Records arrive non-monotonic. Repeating with collate=true does not change the result.',

@@ -2,7 +2,7 @@ import { call, type ListResponse } from '../client.js';
 import type { TestModule, TestResult } from '../runner.js';
 
 const meta = {
-  id: '11-subcontract-rename',
+  id: '07-subcontract-rename',
   title: 'Subcontract field renamed: `wholesaleCostCents` no longer present; `costCents` is the actual key',
   hypothesis:
     'The current public schema documents Subcontract.costCents as the wholesale/base-cost field. Older integrations referencing `wholesaleCostCents` get undefined. This test scans live subcontracts and reports which keys are actually present.',
@@ -26,8 +26,9 @@ interface Order {
 
 async function run(): Promise<TestResult> {
   // Pull multiple pages so non-determinism (test 01) doesn't starve the sample.
+  // Subcontracts are rare (~1%) so we cast a wide net.
   const orders: Order[] = [];
-  for (const skip of [0, 100, 200, 300]) {
+  for (const skip of [0, 100, 200, 300, 400, 500, 600, 700]) {
     const page = await call<ListResponse<Order>>('/order', { query: { limit: 100, skip } });
     orders.push(...page.data);
   }

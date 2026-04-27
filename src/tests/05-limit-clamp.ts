@@ -2,7 +2,7 @@ import { call, type ListResponse } from '../client.js';
 import type { TestModule, TestResult } from '../runner.js';
 
 const meta = {
-  id: '07-limit-clamp',
+  id: '05-limit-clamp',
   title: '`limit` parameter silently clamped at 100',
   hypothesis:
     'Requesting limit=500 should either return up to 500 rows or fail with a 4xx error. Instead the API returns at most 100 rows with no error or warning header.',

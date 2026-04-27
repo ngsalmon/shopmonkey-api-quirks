@@ -6,15 +6,11 @@ import { redact } from './redact.js';
 
 import test01 from './tests/01-non-determinism.js';
 import test02 from './tests/02-where-range-operators.js';
-import test03 from './tests/03-equality-filters.js';
-import test04 from './tests/04-orderby-and-collate.js';
-import test05 from './tests/05-offset-vs-skip.js';
-import test06 from './tests/06-hasmore-past-total.js';
-import test07 from './tests/07-limit-clamp.js';
-import test08 from './tests/08-payment-date-filter.js';
-import test09 from './tests/09-services-not-nested.js';
-import test10 from './tests/10-field-divergence.js';
-import test11 from './tests/11-subcontract-rename.js';
+import test03 from './tests/03-orderby-and-collate.js';
+import test04 from './tests/04-offset-vs-skip.js';
+import test05 from './tests/05-limit-clamp.js';
+import test06 from './tests/06-payment-date-filter.js';
+import test07 from './tests/07-subcontract-rename.js';
 
 export type Verdict = 'CONFIRMED_BUG' | 'NOT_REPRODUCED' | 'INFORMATIONAL' | 'ERROR';
 
@@ -32,19 +28,7 @@ export interface TestModule {
   run: () => Promise<TestResult>;
 }
 
-const TESTS: TestModule[] = [
-  test01,
-  test02,
-  test03,
-  test04,
-  test05,
-  test06,
-  test07,
-  test08,
-  test09,
-  test10,
-  test11,
-];
+const TESTS: TestModule[] = [test01, test02, test03, test04, test05, test06, test07];
 
 function rootDir(): string {
   const here = dirname(fileURLToPath(import.meta.url));

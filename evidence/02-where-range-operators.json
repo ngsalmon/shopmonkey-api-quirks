@@ -3,7 +3,7 @@
   "title": "`where` range operators ($gte, $lte) silently ignored on list endpoints",
   "hypothesis": "A `where` clause with $gte set to a far-future date should return zero records. Instead the API returns the same record count as an unfiltered call.",
   "verdict": "CONFIRMED_BUG",
-  "summary": "Future-date $gte filter returned 100 rows (meta.total=5720); unfiltered returned 100 rows (meta.total=5720). Filter ignored.",
+  "summary": "Future-date $gte filter returned 100 rows (meta.total=5724); unfiltered returned 100 rows (meta.total=5724). Filter ignored.",
   "evidence": {
     "endpoint": "GET /v3/order",
     "baseline": {
@@ -11,7 +11,7 @@
         "limit": 100
       },
       "dataLength": 100,
-      "metaTotal": 5720
+      "metaTotal": 5724
     },
     "filtered": {
       "query": {
@@ -23,7 +23,7 @@
         }
       },
       "dataLength": 100,
-      "metaTotal": 5720
+      "metaTotal": 5724
     }
   },
   "requests": [
@@ -34,10 +34,10 @@
         "limit": "100"
       },
       "status": 200,
-      "durationMs": 275,
+      "durationMs": 282,
       "responseSummary": {
         "dataLength": 100,
-        "metaTotal": 5720,
+        "metaTotal": 5724,
         "metaHasMore": true
       }
     },
@@ -49,13 +49,13 @@
         "where": "{\"createdDate\":{\"$gte\":\"2099-01-01T00:00:00Z\"}}"
       },
       "status": 200,
-      "durationMs": 258,
+      "durationMs": 280,
       "responseSummary": {
         "dataLength": 100,
-        "metaTotal": 5720,
+        "metaTotal": 5724,
         "metaHasMore": true
       }
     }
   ],
-  "capturedAt": "2026-04-27T20:57:48.766Z"
+  "capturedAt": "2026-04-27T21:37:28.243Z"
 }

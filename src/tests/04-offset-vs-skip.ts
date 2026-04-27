@@ -2,7 +2,7 @@ import { call, type ListResponse } from '../client.js';
 import type { TestModule, TestResult } from '../runner.js';
 
 const meta = {
-  id: '05-offset-vs-skip',
+  id: '04-offset-vs-skip',
   title: '`offset` parameter silently ignored on /customer; `skip` works',
   hypothesis:
     'GET /v3/customer?limit=10&offset=0 and ?limit=10&offset=50 should return disjoint pages. They return identical IDs (offset is dropped). The same calls using skip do produce different pages.',

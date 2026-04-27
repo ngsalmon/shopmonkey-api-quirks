@@ -2,7 +2,7 @@ import { call, type ListResponse } from '../client.js';
 import type { TestModule, TestResult } from '../runner.js';
 
 const meta = {
-  id: '08-payment-date-filter',
+  id: '06-payment-date-filter',
   title: 'POST /integration/payment/search ignores `createdDate.$gte` filter',
   hypothesis:
     'Posting where={createdDate:{$gte:"2099-01-01"}} should return zero payments. Instead the endpoint returns the same payments as an unfiltered search.',

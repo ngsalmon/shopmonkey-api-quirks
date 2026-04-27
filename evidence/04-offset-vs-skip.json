@@ -1,5 +1,5 @@
 {
-  "id": "05-offset-vs-skip",
+  "id": "04-offset-vs-skip",
   "title": "`offset` parameter silently ignored on /customer; `skip` works",
   "hypothesis": "GET /v3/customer?limit=10&offset=0 and ?limit=10&offset=50 should return disjoint pages. They return identical IDs (offset is dropped). The same calls using skip do produce different pages.",
   "verdict": "CONFIRMED_BUG",
@@ -28,10 +28,10 @@
         "offset": "0"
       },
       "status": 200,
-      "durationMs": 208,
+      "durationMs": 205,
       "responseSummary": {
         "dataLength": 10,
-        "metaTotal": 3380,
+        "metaTotal": 3381,
         "metaHasMore": true
       }
     },
@@ -43,10 +43,10 @@
         "offset": "50"
       },
       "status": 200,
-      "durationMs": 190,
+      "durationMs": 205,
       "responseSummary": {
         "dataLength": 10,
-        "metaTotal": 3380,
+        "metaTotal": 3381,
         "metaHasMore": true
       }
     },
@@ -58,10 +58,10 @@
         "skip": "0"
       },
       "status": 200,
-      "durationMs": 207,
+      "durationMs": 193,
       "responseSummary": {
         "dataLength": 10,
-        "metaTotal": 3380,
+        "metaTotal": 3381,
         "metaHasMore": true
       }
     },
@@ -73,13 +73,13 @@
         "skip": "50"
       },
       "status": 200,
-      "durationMs": 249,
+      "durationMs": 212,
       "responseSummary": {
         "dataLength": 10,
-        "metaTotal": 3380,
+        "metaTotal": 3381,
         "metaHasMore": true
       }
     }
   ],
-  "capturedAt": "2026-04-27T20:57:50.830Z"
+  "capturedAt": "2026-04-27T21:37:29.840Z"
 }

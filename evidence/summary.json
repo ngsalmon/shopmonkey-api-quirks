@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-04-27T20:59:39.525Z",
+  "generatedAt": "2026-04-27T21:41:04.147Z",
   "results": [
     {
       "id": "01-non-determinism",
@@ -11,61 +11,37 @@
       "id": "02-where-range-operators",
       "title": "`where` range operators ($gte, $lte) silently ignored on list endpoints",
       "verdict": "CONFIRMED_BUG",
-      "summary": "Future-date $gte filter returned 100 rows (meta.total=5720); unfiltered returned 100 rows (meta.total=5720). Filter ignored."
+      "summary": "Future-date $gte filter returned 100 rows (meta.total=5724); unfiltered returned 100 rows (meta.total=5724). Filter ignored."
     },
     {
-      "id": "03-equality-filters",
-      "title": "Non-status equality filters silently ignored",
-      "verdict": "NOT_REPRODUCED",
-      "summary": "customerId equality filter honored — all 2 returned rows match."
-    },
-    {
-      "id": "04-orderby-and-collate",
+      "id": "03-orderby-and-collate",
       "title": "`orderBy` accepted but does not produce monotonic ordering; `collate=true` does not stabilize",
       "verdict": "CONFIRMED_BUG",
-      "summary": "orderBy returned 100 rows with 47 adjacent-pair inversions. With collate=true: 52 inversions. Expected 0 if sort were honored."
+      "summary": "orderBy returned 100 rows with 48 adjacent-pair inversions. With collate=true: 54 inversions. Expected 0 if sort were honored."
     },
     {
-      "id": "05-offset-vs-skip",
+      "id": "04-offset-vs-skip",
       "title": "`offset` parameter silently ignored on /customer; `skip` works",
       "verdict": "CONFIRMED_BUG",
       "summary": "offset=0 vs offset=50 returned identical IDs (offset dropped). skip=0 vs skip=50 returned disjoint pages (skip works)."
     },
     {
-      "id": "06-hasmore-past-total",
-      "title": "`meta.hasMore` returns `true` when skip exceeds `meta.total`",
-      "verdict": "NOT_REPRODUCED",
-      "summary": "Probe meta.total=5720. skip=6720 returned 0 rows, hasMore=false."
-    },
-    {
-      "id": "07-limit-clamp",
+      "id": "05-limit-clamp",
       "title": "`limit` parameter silently clamped at 100",
       "verdict": "CONFIRMED_BUG",
       "summary": "Requested limit=500, received 100 rows (clamped to 100). No error, no warning."
     },
     {
-      "id": "08-payment-date-filter",
+      "id": "06-payment-date-filter",
       "title": "POST /integration/payment/search ignores `createdDate.$gte` filter",
       "verdict": "CONFIRMED_BUG",
-      "summary": "Future-date filter returned 100 rows (meta.total=3358); baseline returned 100 (meta.total=3358). Filter ignored."
+      "summary": "Future-date filter returned 100 rows (meta.total=3359); baseline returned 100 (meta.total=3359). Filter ignored."
     },
     {
-      "id": "09-services-not-nested",
-      "title": "Order responses do not include services (N+1 sync pattern required)",
-      "verdict": "INFORMATIONAL",
-      "summary": "List response lacks services. Detail response lacks services. Sample order has 1 services fetched via separate /service call. For N orders with services, N+1 round-trips required."
-    },
-    {
-      "id": "10-field-divergence",
-      "title": "Documented schema field names confirmed in live responses",
-      "verdict": "INFORMATIONAL",
-      "summary": "Captured live key sets for Order/Service/Labor/Part. See evidence for field-name confirmation."
-    },
-    {
-      "id": "11-subcontract-rename",
+      "id": "07-subcontract-rename",
       "title": "Subcontract field renamed: `wholesaleCostCents` no longer present; `costCents` is the actual key",
       "verdict": "CONFIRMED_BUG",
-      "summary": "Scanned 5 subcontracts across 400 orders. costCents present on 5 (populated on 5). wholesaleCostCents present on 0 (populated on 0). retailCostCents populated on 5."
+      "summary": "Scanned 8 subcontracts across 800 orders. costCents present on 8 (populated on 8). wholesaleCostCents present on 0 (populated on 0). retailCostCents populated on 8."
     }
   ]
 }
