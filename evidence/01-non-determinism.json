@@ -1,0 +1,204 @@
+{
+  "id": "01-non-determinism",
+  "title": "REST list endpoints return non-deterministic results across identical calls",
+  "hypothesis": "Five identical GET /v3/order calls with the same skip/limit/orderBy return overlapping but different ID sets (Jaccard < 1.0).",
+  "verdict": "CONFIRMED_BUG",
+  "summary": "Min Jaccard across 10 pairs = 0.000 (1.0 means identical sets). Identical calls returned different IDs.",
+  "evidence": {
+    "endpoint": "GET /v3/order",
+    "query": {
+      "limit": 100,
+      "skip": 200,
+      "orderBy": "{\"createdDate\":\"desc\"}"
+    },
+    "passes": 5,
+    "perCallCounts": [
+      {
+        "call": 1,
+        "count": 100
+      },
+      {
+        "call": 2,
+        "count": 100
+      },
+      {
+        "call": 3,
+        "count": 100
+      },
+      {
+        "call": 4,
+        "count": 100
+      },
+      {
+        "call": 5,
+        "count": 100
+      }
+    ],
+    "pairwiseJaccard": [
+      {
+        "a": 1,
+        "b": 2,
+        "jaccard": 0,
+        "aOnly": 100,
+        "bOnly": 100,
+        "common": 0
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "jaccard": 0.02040816326530612,
+        "aOnly": 96,
+        "bOnly": 96,
+        "common": 4
+      },
+      {
+        "a": 1,
+        "b": 4,
+        "jaccard": 0,
+        "aOnly": 100,
+        "bOnly": 100,
+        "common": 0
+      },
+      {
+        "a": 1,
+        "b": 5,
+        "jaccard": 0.015228426395939087,
+        "aOnly": 97,
+        "bOnly": 97,
+        "common": 3
+      },
+      {
+        "a": 2,
+        "b": 3,
+        "jaccard": 0,
+        "aOnly": 100,
+        "bOnly": 100,
+        "common": 0
+      },
+      {
+        "a": 2,
+        "b": 4,
+        "jaccard": 0,
+        "aOnly": 100,
+        "bOnly": 100,
+        "common": 0
+      },
+      {
+        "a": 2,
+        "b": 5,
+        "jaccard": 0,
+        "aOnly": 100,
+        "bOnly": 100,
+        "common": 0
+      },
+      {
+        "a": 3,
+        "b": 4,
+        "jaccard": 0,
+        "aOnly": 100,
+        "bOnly": 100,
+        "common": 0
+      },
+      {
+        "a": 3,
+        "b": 5,
+        "jaccard": 0,
+        "aOnly": 100,
+        "bOnly": 100,
+        "common": 0
+      },
+      {
+        "a": 4,
+        "b": 5,
+        "jaccard": 0,
+        "aOnly": 100,
+        "bOnly": 100,
+        "common": 0
+      }
+    ],
+    "minJaccard": 0
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "skip": "200",
+        "orderBy": "{\"createdDate\":\"desc\"}"
+      },
+      "status": 200,
+      "durationMs": 359,
+      "responseSummary": {
+        "dataLength": 100,
+        "metaTotal": 5720,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "skip": "200",
+        "orderBy": "{\"createdDate\":\"desc\"}"
+      },
+      "status": 200,
+      "durationMs": 245,
+      "responseSummary": {
+        "dataLength": 100,
+        "metaTotal": 5720,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "skip": "200",
+        "orderBy": "{\"createdDate\":\"desc\"}"
+      },
+      "status": 200,
+      "durationMs": 247,
+      "responseSummary": {
+        "dataLength": 100,
+        "metaTotal": 5720,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "skip": "200",
+        "orderBy": "{\"createdDate\":\"desc\"}"
+      },
+      "status": 200,
+      "durationMs": 314,
+      "responseSummary": {
+        "dataLength": 100,
+        "metaTotal": 5720,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "skip": "200",
+        "orderBy": "{\"createdDate\":\"desc\"}"
+      },
+      "status": 200,
+      "durationMs": 279,
+      "responseSummary": {
+        "dataLength": 100,
+        "metaTotal": 5720,
+        "metaHasMore": true
+      }
+    }
+  ],
+  "capturedAt": "2026-04-27T20:57:48.215Z"
+}

@@ -1,0 +1,83 @@
+{
+  "id": "04-orderby-and-collate",
+  "title": "`orderBy` accepted but does not produce monotonic ordering; `collate=true` does not stabilize",
+  "hypothesis": "GET /v3/order with orderBy={\"createdDate\":\"asc\"} should return records sorted ascending by createdDate. Records arrive non-monotonic. Repeating with collate=true does not change the result.",
+  "verdict": "CONFIRMED_BUG",
+  "summary": "orderBy returned 100 rows with 47 adjacent-pair inversions. With collate=true: 52 inversions. Expected 0 if sort were honored.",
+  "evidence": {
+    "endpoint": "GET /v3/order",
+    "orderBy": {
+      "createdDate": "asc"
+    },
+    "withoutCollate": {
+      "rows": 100,
+      "adjacentInversions": 47,
+      "first5Dates": [
+        "2024-07-19T17:48:00.194Z",
+        "2024-08-31T14:35:03.069Z",
+        "2025-10-21T18:00:58.380Z",
+        "2025-10-03T17:22:16.720Z",
+        "2026-03-13T17:54:27.798Z"
+      ],
+      "last5Dates": [
+        "2026-01-05T16:36:01.573Z",
+        "2026-03-03T19:22:17.686Z",
+        "2026-03-25T19:42:28.503Z",
+        "2025-01-22T20:15:26.246Z",
+        "2025-08-18T21:27:43.242Z"
+      ]
+    },
+    "withCollate": {
+      "rows": 100,
+      "adjacentInversions": 52,
+      "first5Dates": [
+        "2025-08-27T14:05:08.796Z",
+        "2026-02-12T21:22:22.385Z",
+        "2025-03-31T18:20:35.283Z",
+        "2026-01-27T18:19:30.270Z",
+        "2025-09-22T15:11:12.337Z"
+      ],
+      "last5Dates": [
+        "2026-02-28T17:44:03.524Z",
+        "2025-04-30T15:18:24.115Z",
+        "2025-04-08T17:43:48.299Z",
+        "2024-11-26T18:11:47.460Z",
+        "2025-08-26T21:36:43.190Z"
+      ]
+    }
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "orderBy": "{\"createdDate\":\"asc\"}"
+      },
+      "status": 200,
+      "durationMs": 271,
+      "responseSummary": {
+        "dataLength": 100,
+        "metaTotal": 5720,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "orderBy": "{\"createdDate\":\"asc\"}",
+        "collate": "true"
+      },
+      "status": 200,
+      "durationMs": 269,
+      "responseSummary": {
+        "dataLength": 100,
+        "metaTotal": 5720,
+        "metaHasMore": true
+      }
+    }
+  ],
+  "capturedAt": "2026-04-27T20:57:49.828Z"
+}

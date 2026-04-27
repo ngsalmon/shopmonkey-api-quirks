@@ -1,0 +1,30 @@
+{
+  "id": "07-limit-clamp",
+  "title": "`limit` parameter silently clamped at 100",
+  "hypothesis": "Requesting limit=500 should either return up to 500 rows or fail with a 4xx error. Instead the API returns at most 100 rows with no error or warning header.",
+  "verdict": "CONFIRMED_BUG",
+  "summary": "Requested limit=500, received 100 rows (clamped to 100). No error, no warning.",
+  "evidence": {
+    "endpoint": "GET /v3/order",
+    "requestedLimit": 500,
+    "receivedRows": 100,
+    "metaTotal": 5720
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "500"
+      },
+      "status": 200,
+      "durationMs": 282,
+      "responseSummary": {
+        "dataLength": 100,
+        "metaTotal": 5720,
+        "metaHasMore": true
+      }
+    }
+  ],
+  "capturedAt": "2026-04-27T20:57:51.617Z"
+}

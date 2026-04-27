@@ -1,0 +1,23 @@
+{
+  "name": "shopmonkey-api-quirks",
+  "version": "1.0.0",
+  "description": "Reproducible test harness demonstrating Shopmonkey REST API quirks (non-determinism, ignored filters, pagination bugs).",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:all": "tsx src/runner.ts",
+    "test:one": "tsx src/runner.ts --only",
+    "list": "tsx src/runner.ts --list"
+  },
+  "engines": {
+    "node": ">=20.10"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7"
+  }
+}
