@@ -28,7 +28,7 @@
         "offset": "0"
       },
       "status": 200,
-      "durationMs": 205,
+      "durationMs": 200,
       "responseSummary": {
         "dataLength": 10,
         "metaTotal": 3381,
@@ -43,7 +43,7 @@
         "offset": "50"
       },
       "status": 200,
-      "durationMs": 205,
+      "durationMs": 240,
       "responseSummary": {
         "dataLength": 10,
         "metaTotal": 3381,
@@ -58,7 +58,7 @@
         "skip": "0"
       },
       "status": 200,
-      "durationMs": 193,
+      "durationMs": 189,
       "responseSummary": {
         "dataLength": 10,
         "metaTotal": 3381,
@@ -73,7 +73,7 @@
         "skip": "50"
       },
       "status": 200,
-      "durationMs": 212,
+      "durationMs": 205,
       "responseSummary": {
         "dataLength": 10,
         "metaTotal": 3381,
@@ -81,5 +81,5 @@
       }
     }
   ],
-  "capturedAt": "2026-04-27T21:37:29.840Z"
+  "capturedAt": "2026-04-27T22:02:39.837Z"
 }

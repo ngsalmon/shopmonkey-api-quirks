@@ -1,49 +1,71 @@
 {
   "id": "03-orderby-and-collate",
-  "title": "`orderBy` accepted but does not produce monotonic ordering; `collate=true` does not stabilize",
-  "hypothesis": "GET /v3/order with orderBy={\"createdDate\":\"asc\"} should return records sorted ascending by createdDate. Records arrive non-monotonic. Repeating with collate=true does not change the result.",
+  "title": "`orderBy` is honored on `id` but not on `createdDate`; `collate=true` does not change behavior",
+  "hypothesis": "`orderBy` syntax `{\"<field>\":\"asc\"}` works on `id` (1 of 49 inversions across 50 rows — essentially sorted). The same syntax on `createdDate` produces ~25 of 49 inversions — random. Tested 8 alternative encodings (string, hyphen-prefix, JSON 1/-1, array forms); none sort `createdDate`. So this is not a syntax issue — `createdDate` simply is not orderable through this endpoint.",
   "verdict": "CONFIRMED_BUG",
-  "summary": "orderBy returned 100 rows with 48 adjacent-pair inversions. With collate=true: 54 inversions. Expected 0 if sort were honored.",
+  "summary": "orderBy={\"id\":\"asc\"} produced 2/49 alphabetic inversions on UUIDs (effectively sorted). Same syntax on createdDate produced ≥22/49 adjacent-pair inversions across all 8 encodings tested. createdDate is not orderable. collate=true: 24 inversions.",
   "evidence": {
     "endpoint": "GET /v3/order",
-    "orderBy": {
-      "createdDate": "asc"
+    "idControl": {
+      "orderBy": {
+        "id": "asc"
+      },
+      "rows": 50,
+      "alphabeticInversions": 2
     },
-    "withoutCollate": {
-      "rows": 100,
-      "adjacentInversions": 48,
-      "first5Dates": [
-        "2025-08-13T18:25:41.797Z",
-        "2025-10-28T18:38:04.177Z",
-        "2026-03-18T20:33:54.687Z",
-        "2025-10-06T22:31:13.919Z",
-        "2024-10-23T17:02:25.351Z"
-      ],
-      "last5Dates": [
-        "2025-11-28T17:29:59.480Z",
-        "2026-02-03T21:25:27.150Z",
-        "2026-04-06T15:22:23.920Z",
-        "2025-09-04T18:30:20.463Z",
-        "2026-04-24T21:48:10.425Z"
-      ]
-    },
-    "withCollate": {
-      "rows": 100,
-      "adjacentInversions": 54,
-      "first5Dates": [
-        "2026-01-19T14:15:43.622Z",
-        "2025-06-25T22:22:03.527Z",
-        "2024-10-15T17:32:18.485Z",
-        "2025-09-16T22:57:43.898Z",
-        "2024-10-07T16:07:26.866Z"
-      ],
-      "last5Dates": [
-        "2025-11-12T17:32:01.302Z",
-        "2025-01-02T19:16:57.336Z",
-        "2025-11-17T21:25:50.200Z",
-        "2025-06-09T17:06:31.114Z",
-        "2025-03-31T15:50:18.078Z"
-      ]
+    "createdDateVariants": [
+      {
+        "label": "object {createdDate:\"asc\"}",
+        "rows": 50,
+        "ascInv": 24,
+        "descInv": 25
+      },
+      {
+        "label": "object {createdDate:1}",
+        "rows": 50,
+        "ascInv": 23,
+        "descInv": 26
+      },
+      {
+        "label": "object {createdDate:\"ascending\"}",
+        "rows": 50,
+        "ascInv": 27,
+        "descInv": 22
+      },
+      {
+        "label": "string \"createdDate\"",
+        "rows": 50,
+        "ascInv": 23,
+        "descInv": 26
+      },
+      {
+        "label": "string \"-createdDate\"",
+        "rows": 50,
+        "ascInv": 24,
+        "descInv": 25
+      },
+      {
+        "label": "string \"createdDate asc\"",
+        "rows": 50,
+        "ascInv": 26,
+        "descInv": 23
+      },
+      {
+        "label": "array [{field,direction}]",
+        "rows": 50,
+        "ascInv": 24,
+        "descInv": 25
+      },
+      {
+        "label": "array [[\"createdDate\",\"ASC\"]]",
+        "rows": 50,
+        "ascInv": 27,
+        "descInv": 22
+      }
+    ],
+    "collateOnCreatedDate": {
+      "rows": 50,
+      "ascInversions": 24
     }
   },
   "requests": [
@@ -51,14 +73,14 @@
       "method": "GET",
       "path": "/order",
       "query": {
-        "limit": "100",
+        "limit": "50",
         "orderBy": "{\"createdDate\":\"asc\"}"
       },
       "status": 200,
-      "durationMs": 348,
+      "durationMs": 255,
       "responseSummary": {
-        "dataLength": 100,
-        "metaTotal": 5724,
+        "dataLength": 50,
+        "metaTotal": 5725,
         "metaHasMore": true
       }
     },
@@ -66,18 +88,138 @@
       "method": "GET",
       "path": "/order",
       "query": {
-        "limit": "100",
+        "limit": "50",
+        "orderBy": "{\"createdDate\":1}"
+      },
+      "status": 200,
+      "durationMs": 239,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "{\"createdDate\":\"ascending\"}"
+      },
+      "status": 200,
+      "durationMs": 246,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "createdDate"
+      },
+      "status": 200,
+      "durationMs": 240,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "-createdDate"
+      },
+      "status": 200,
+      "durationMs": 249,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "createdDate asc"
+      },
+      "status": 200,
+      "durationMs": 266,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "[{\"field\":\"createdDate\",\"direction\":\"asc\"}]"
+      },
+      "status": 200,
+      "durationMs": 214,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "[[\"createdDate\",\"ASC\"]]"
+      },
+      "status": 200,
+      "durationMs": 219,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
+        "orderBy": "{\"id\":\"asc\"}"
+      },
+      "status": 200,
+      "durationMs": 284,
+      "responseSummary": {
+        "dataLength": 50,
+        "metaTotal": 5725,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "50",
         "orderBy": "{\"createdDate\":\"asc\"}",
         "collate": "true"
       },
       "status": 200,
-      "durationMs": 263,
+      "durationMs": 247,
       "responseSummary": {
-        "dataLength": 100,
-        "metaTotal": 5724,
+        "dataLength": 50,
+        "metaTotal": 5725,
         "metaHasMore": true
       }
     }
   ],
-  "capturedAt": "2026-04-27T21:37:28.876Z"
+  "capturedAt": "2026-04-27T22:02:38.878Z"
 }

@@ -3,9 +3,9 @@ import type { TestModule, TestResult } from '../runner.js';
 
 const meta = {
   id: '01-non-determinism',
-  title: 'REST list endpoints return non-deterministic results across identical calls',
+  title: 'REST list endpoints return non-deterministic results across identical calls — even with `orderBy` on a sortable field and a `gte` filter',
   hypothesis:
-    'Five identical GET /v3/order calls with the same skip/limit/orderBy return overlapping but different ID sets (Jaccard < 1.0).',
+    'Five identical GET /v3/order calls with the same skip/limit, an `orderBy={"id":"asc"}` clause (which test 03 confirms is honored), and a bare-`gte` filter on `createdDate` (which test 02 confirms is honored) should return the same 100 IDs every time. Instead the result sets are mostly disjoint (Jaccard < 1.0 across pairs).',
 };
 
 interface OrderRow {
@@ -13,7 +13,12 @@ interface OrderRow {
 }
 
 const ENDPOINT = '/order';
-const QUERY = { limit: 100, skip: 200, orderBy: JSON.stringify({ createdDate: 'desc' }) };
+const QUERY = {
+  limit: 100,
+  skip: 200,
+  orderBy: JSON.stringify({ id: 'asc' }),
+  where: JSON.stringify({ createdDate: { gte: '2025-01-01T00:00:00Z' } }),
+};
 const PASSES = 5;
 
 async function run(): Promise<TestResult> {
@@ -39,8 +44,8 @@ async function run(): Promise<TestResult> {
   const verdict = minJaccard < 1 ? 'CONFIRMED_BUG' : 'NOT_REPRODUCED';
   const summary =
     verdict === 'CONFIRMED_BUG'
-      ? `Min Jaccard across ${pairwise.length} pairs = ${minJaccard.toFixed(3)} (1.0 means identical sets). Identical calls returned different IDs.`
-      : `All ${PASSES} calls returned identical ID sets (Jaccard = 1.0).`;
+      ? `Min Jaccard across ${pairwise.length} pairs = ${minJaccard.toFixed(3)} (1.0 means identical sets). Identical calls — same skip/limit, same orderBy on id (which sorts correctly), same bare-\`gte\` filter on createdDate (which filters correctly) — returned different ID sets.`
+      : `All ${PASSES} calls returned identical ID sets (Jaccard = 1.0). With sortable orderBy + filter, the API is now deterministic.`;
 
   return {
     id: meta.id,

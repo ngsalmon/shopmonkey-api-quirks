@@ -1,29 +1,43 @@
 {
   "id": "06-payment-date-filter",
-  "title": "POST /integration/payment/search ignores `createdDate.$gte` filter",
-  "hypothesis": "Posting where={createdDate:{$gte:\"2099-01-01\"}} should return zero payments. Instead the endpoint returns the same payments as an unfiltered search.",
+  "title": "POST /integration/payment/search — `$gte` silently ignored, `gte` honored",
+  "hypothesis": "Same as test 02 but for the documented payment search endpoint. The MongoDB-style `$gte` operator is silently dropped; the bare `gte` form filters correctly. Neither syntax is documented.",
   "verdict": "CONFIRMED_BUG",
-  "summary": "Future-date filter returned 100 rows (meta.total=3359); baseline returned 100 (meta.total=3359). Filter ignored.",
+  "summary": "`$gte` is silently dropped (total 3359 = baseline 3359); bare `gte` correctly returns 0 for far-future and 221 for 2026-04-01T00:00:00Z. Same silent-ignore pattern as test 02.",
   "evidence": {
     "endpoint": "POST /v3/integration/payment/search",
     "baseline": {
-      "body": {
-        "limit": 100
-      },
-      "dataLength": 100,
       "metaTotal": 3359
     },
-    "filtered": {
+    "dollarPrefix": {
       "body": {
-        "limit": 100,
         "where": {
           "createdDate": {
             "$gte": "2099-01-01T00:00:00Z"
           }
         }
       },
-      "dataLength": 100,
       "metaTotal": 3359
+    },
+    "barePrefixFuture": {
+      "body": {
+        "where": {
+          "createdDate": {
+            "gte": "2099-01-01T00:00:00Z"
+          }
+        }
+      },
+      "metaTotal": 0
+    },
+    "barePrefixRecent": {
+      "body": {
+        "where": {
+          "createdDate": {
+            "gte": "2026-04-01T00:00:00Z"
+          }
+        }
+      },
+      "metaTotal": 221
     }
   },
   "requests": [
@@ -34,7 +48,7 @@
         "limit": 100
       },
       "status": 200,
-      "durationMs": 199,
+      "durationMs": 185,
       "responseSummary": {
         "dataLength": 100,
         "metaTotal": 3359,
@@ -53,13 +67,51 @@
         }
       },
       "status": 200,
-      "durationMs": 194,
+      "durationMs": 201,
       "responseSummary": {
         "dataLength": 100,
         "metaTotal": 3359,
         "metaHasMore": true
       }
+    },
+    {
+      "method": "POST",
+      "path": "/integration/payment/search",
+      "body": {
+        "limit": 100,
+        "where": {
+          "createdDate": {
+            "gte": "2099-01-01T00:00:00Z"
+          }
+        }
+      },
+      "status": 200,
+      "durationMs": 129,
+      "responseSummary": {
+        "dataLength": 0,
+        "metaTotal": 0,
+        "metaHasMore": false
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/integration/payment/search",
+      "body": {
+        "limit": 100,
+        "where": {
+          "createdDate": {
+            "gte": "2026-04-01T00:00:00Z"
+          }
+        }
+      },
+      "status": 200,
+      "durationMs": 244,
+      "responseSummary": {
+        "dataLength": 100,
+        "metaTotal": 221,
+        "metaHasMore": true
+      }
     }
   ],
-  "capturedAt": "2026-04-27T21:37:30.579Z"
+  "capturedAt": "2026-04-27T22:02:41.159Z"
 }

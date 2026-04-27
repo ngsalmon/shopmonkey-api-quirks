@@ -3,9 +3,9 @@ import type { TestModule, TestResult } from '../runner.js';
 
 const meta = {
   id: '06-payment-date-filter',
-  title: 'POST /integration/payment/search ignores `createdDate.$gte` filter',
+  title: 'POST /integration/payment/search — `$gte` silently ignored, `gte` honored',
   hypothesis:
-    'Posting where={createdDate:{$gte:"2099-01-01"}} should return zero payments. Instead the endpoint returns the same payments as an unfiltered search.',
+    'Same as test 02 but for the documented payment search endpoint. The MongoDB-style `$gte` operator is silently dropped; the bare `gte` form filters correctly. Neither syntax is documented.',
 };
 
 interface Payment {
@@ -14,6 +14,7 @@ interface Payment {
 }
 
 const FUTURE = '2099-01-01T00:00:00Z';
+const RECENT = '2026-04-01T00:00:00Z';
 
 async function searchPayments(body: Record<string, unknown>) {
   return call<ListResponse<Payment>>('/integration/payment/search', { method: 'POST', body });
@@ -21,18 +22,27 @@ async function searchPayments(body: Record<string, unknown>) {
 
 async function run(): Promise<TestResult> {
   const baseline = await searchPayments({ limit: 100 });
-  const filtered = await searchPayments({ limit: 100, where: { createdDate: { $gte: FUTURE } } });
+  const dollar = await searchPayments({ limit: 100, where: { createdDate: { $gte: FUTURE } } });
+  const bareFuture = await searchPayments({ limit: 100, where: { createdDate: { gte: FUTURE } } });
+  const bareRecent = await searchPayments({ limit: 100, where: { createdDate: { gte: RECENT } } });
 
-  const baselineLen = baseline.data.length;
-  const filteredLen = filtered.data.length;
-  const baselineTotal = baseline.meta.total;
-  const filteredTotal = filtered.meta.total;
+  const baselineTotal = baseline.meta.total ?? 0;
+  const dollarTotal = dollar.meta.total ?? 0;
+  const bareFutureTotal = bareFuture.meta.total ?? 0;
+  const bareRecentTotal = bareRecent.meta.total ?? 0;
 
-  const filterHonored = filteredLen === 0 || filteredTotal === 0;
-  const verdict = filterHonored ? 'NOT_REPRODUCED' : 'CONFIRMED_BUG';
-  const summary = filterHonored
-    ? 'Future-date filter produced 0 results — appears honored.'
-    : `Future-date filter returned ${filteredLen} rows (meta.total=${filteredTotal}); baseline returned ${baselineLen} (meta.total=${baselineTotal}). Filter ignored.`;
+  const dollarIgnored = dollarTotal === baselineTotal;
+  const bareWorks = bareFutureTotal === 0 && bareRecentTotal > 0 && bareRecentTotal < baselineTotal;
+
+  let verdict: TestResult['verdict'] = 'INFORMATIONAL';
+  let summary = '';
+  if (dollarIgnored && bareWorks) {
+    verdict = 'CONFIRMED_BUG';
+    summary = `\`$gte\` is silently dropped (total ${dollarTotal} = baseline ${baselineTotal}); bare \`gte\` correctly returns 0 for far-future and ${bareRecentTotal} for ${RECENT}. Same silent-ignore pattern as test 02.`;
+  } else {
+    summary = `$gte total=${dollarTotal}, gte future=${bareFutureTotal}, gte recent=${bareRecentTotal}, baseline=${baselineTotal}.`;
+    verdict = bareFutureTotal === 0 ? 'CONFIRMED_BUG' : 'NOT_REPRODUCED';
+  }
 
   return {
     id: meta.id,
@@ -42,12 +52,10 @@ async function run(): Promise<TestResult> {
     summary,
     evidence: {
       endpoint: 'POST /v3/integration/payment/search',
-      baseline: { body: { limit: 100 }, dataLength: baselineLen, metaTotal: baselineTotal },
-      filtered: {
-        body: { limit: 100, where: { createdDate: { $gte: FUTURE } } },
-        dataLength: filteredLen,
-        metaTotal: filteredTotal,
-      },
+      baseline: { metaTotal: baselineTotal },
+      dollarPrefix: { body: { where: { createdDate: { $gte: FUTURE } } }, metaTotal: dollarTotal },
+      barePrefixFuture: { body: { where: { createdDate: { gte: FUTURE } } }, metaTotal: bareFutureTotal },
+      barePrefixRecent: { body: { where: { createdDate: { gte: RECENT } } }, metaTotal: bareRecentTotal },
     },
   };
 }
