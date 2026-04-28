@@ -7,6 +7,8 @@ import { redact } from './redact.js';
 import test01 from './tests/01-non-determinism.js';
 import test02 from './tests/02-orderby-and-collate.js';
 import test03 from './tests/03-limit-clamp.js';
+import test04 from './tests/04-cursor-non-determinism.js';
+import test05 from './tests/05-cursor-within-run-duplicates.js';
 
 export interface TestResult {
   id: string;
@@ -21,7 +23,7 @@ export interface TestModule {
   run: () => Promise<TestResult>;
 }
 
-const TESTS: TestModule[] = [test01, test02, test03];
+const TESTS: TestModule[] = [test01, test02, test03, test04, test05];
 
 function rootDir(): string {
   const here = dirname(fileURLToPath(import.meta.url));

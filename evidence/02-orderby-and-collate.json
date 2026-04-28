@@ -2,7 +2,7 @@
   "id": "02-orderby-and-collate",
   "title": "`orderBy` is honored on `id` but ignored on `createdDate` and `updatedDate`",
   "hypothesis": "`orderBy` is honored on `id` (~1–5 of 49 inversions on UUIDs sorted lexically). The same syntax on `createdDate` and `updatedDate` produces ~20+ adjacent-pair inversions across 8 alternative encodings — random. So this is not a syntax issue: dates simply are not orderable through `GET /v3/order`. This matters for incremental sync, which would naturally want `updatedDate` ordering.",
-  "summary": "orderBy={\"id\":\"asc\"} produced 0/49 alphabetic inversions on UUIDs (effectively sorted). Same syntax on createdDate: ≥19/49 inversions across 8 encodings. On updatedDate: ≥21/49 inversions across 8 encodings. Neither date field is orderable. collate=true on createdDate: 25 inversions.",
+  "summary": "orderBy={\"id\":\"asc\"} produced 3/49 alphabetic inversions on UUIDs (effectively sorted). Same syntax on createdDate: ≥17/49 inversions across 8 encodings. On updatedDate: ≥22/49 inversions across 8 encodings. Neither date field is orderable. collate=true on createdDate: 22 inversions.",
   "evidence": {
     "endpoint": "GET /v3/order",
     "idControl": {
@@ -10,7 +10,7 @@
         "id": "asc"
       },
       "rows": 50,
-      "alphabeticInversions": 0
+      "alphabeticInversions": 3
     },
     "createdDateVariants": [
       {
@@ -22,8 +22,8 @@
       {
         "label": "object {createdDate:1}",
         "rows": 50,
-        "ascInv": 28,
-        "descInv": 21
+        "ascInv": 17,
+        "descInv": 32
       },
       {
         "label": "object {createdDate:\"ascending\"}",
@@ -34,87 +34,87 @@
       {
         "label": "string \"createdDate\"",
         "rows": 50,
-        "ascInv": 26,
-        "descInv": 23
+        "ascInv": 29,
+        "descInv": 20
       },
       {
         "label": "string \"-createdDate\"",
         "rows": 50,
-        "ascInv": 26,
-        "descInv": 23
+        "ascInv": 27,
+        "descInv": 22
       },
       {
         "label": "string \"createdDate asc\"",
         "rows": 50,
-        "ascInv": 30,
-        "descInv": 19
+        "ascInv": 24,
+        "descInv": 25
       },
       {
         "label": "array [{field,direction}]",
         "rows": 50,
-        "ascInv": 21,
-        "descInv": 28
+        "ascInv": 25,
+        "descInv": 24
       },
       {
         "label": "array [[\"createdDate\",\"ASC\"]]",
         "rows": 50,
-        "ascInv": 25,
-        "descInv": 24
+        "ascInv": 22,
+        "descInv": 27
       }
     ],
     "updatedDateVariants": [
       {
         "label": "object {updatedDate:\"asc\"}",
         "rows": 50,
-        "ascInv": 25,
+        "ascInv": 24,
         "descInv": 24
       },
       {
         "label": "object {updatedDate:1}",
         "rows": 50,
-        "ascInv": 21,
-        "descInv": 28
-      },
-      {
-        "label": "object {updatedDate:\"ascending\"}",
-        "rows": 50,
         "ascInv": 23,
         "descInv": 25
       },
       {
+        "label": "object {updatedDate:\"ascending\"}",
+        "rows": 50,
+        "ascInv": 22,
+        "descInv": 27
+      },
+      {
         "label": "string \"updatedDate\"",
         "rows": 50,
-        "ascInv": 25,
+        "ascInv": 26,
         "descInv": 23
       },
       {
         "label": "string \"-updatedDate\"",
         "rows": 50,
-        "ascInv": 23,
-        "descInv": 26
+        "ascInv": 26,
+        "descInv": 22
       },
       {
         "label": "string \"updatedDate asc\"",
         "rows": 50,
-        "ascInv": 25,
-        "descInv": 24
+        "ascInv": 22,
+        "descInv": 27
       },
       {
         "label": "array [{field,direction}]",
         "rows": 50,
-        "ascInv": 24,
-        "descInv": 25
+        "ascInv": 26,
+        "descInv": 22
       },
       {
         "label": "array [[\"updatedDate\",\"ASC\"]]",
         "rows": 50,
-        "ascInv": 24,
+        "ascInv": 26,
         "descInv": 23
       }
     ],
     "collateOnCreatedDate": {
       "rows": 50,
-      "ascInversions": 25
+      "ascInversions": 22
     }
   },
   "requests": [
@@ -126,10 +126,10 @@
         "orderBy": "{\"createdDate\":\"asc\"}"
       },
       "status": 200,
-      "durationMs": 265,
+      "durationMs": 253,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -141,10 +141,10 @@
         "orderBy": "{\"createdDate\":1}"
       },
       "status": 200,
-      "durationMs": 287,
+      "durationMs": 213,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -156,10 +156,10 @@
         "orderBy": "{\"createdDate\":\"ascending\"}"
       },
       "status": 200,
-      "durationMs": 234,
+      "durationMs": 292,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -171,10 +171,10 @@
         "orderBy": "createdDate"
       },
       "status": 200,
-      "durationMs": 237,
+      "durationMs": 261,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -186,10 +186,10 @@
         "orderBy": "-createdDate"
       },
       "status": 200,
-      "durationMs": 215,
+      "durationMs": 251,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -201,10 +201,10 @@
         "orderBy": "createdDate asc"
       },
       "status": 200,
-      "durationMs": 204,
+      "durationMs": 341,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -216,10 +216,10 @@
         "orderBy": "[{\"field\":\"createdDate\",\"direction\":\"asc\"}]"
       },
       "status": 200,
-      "durationMs": 233,
+      "durationMs": 248,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -231,10 +231,10 @@
         "orderBy": "[[\"createdDate\",\"ASC\"]]"
       },
       "status": 200,
-      "durationMs": 253,
+      "durationMs": 265,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -246,10 +246,10 @@
         "orderBy": "{\"updatedDate\":\"asc\"}"
       },
       "status": 200,
-      "durationMs": 201,
+      "durationMs": 336,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -261,10 +261,10 @@
         "orderBy": "{\"updatedDate\":1}"
       },
       "status": 200,
-      "durationMs": 244,
+      "durationMs": 311,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -276,10 +276,10 @@
         "orderBy": "{\"updatedDate\":\"ascending\"}"
       },
       "status": 200,
-      "durationMs": 260,
+      "durationMs": 314,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -291,10 +291,10 @@
         "orderBy": "updatedDate"
       },
       "status": 200,
-      "durationMs": 248,
+      "durationMs": 288,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -306,10 +306,10 @@
         "orderBy": "-updatedDate"
       },
       "status": 200,
-      "durationMs": 258,
+      "durationMs": 274,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -321,10 +321,10 @@
         "orderBy": "updatedDate asc"
       },
       "status": 200,
-      "durationMs": 237,
+      "durationMs": 243,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -336,10 +336,10 @@
         "orderBy": "[{\"field\":\"updatedDate\",\"direction\":\"asc\"}]"
       },
       "status": 200,
-      "durationMs": 312,
+      "durationMs": 280,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -351,10 +351,10 @@
         "orderBy": "[[\"updatedDate\",\"ASC\"]]"
       },
       "status": 200,
-      "durationMs": 245,
+      "durationMs": 299,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -366,10 +366,10 @@
         "orderBy": "{\"id\":\"asc\"}"
       },
       "status": 200,
-      "durationMs": 242,
+      "durationMs": 267,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     },
@@ -382,13 +382,13 @@
         "collate": "true"
       },
       "status": 200,
-      "durationMs": 199,
+      "durationMs": 283,
       "responseSummary": {
         "dataLength": 50,
-        "metaTotal": 5725,
+        "metaTotal": 5743,
         "metaHasMore": true
       }
     }
   ],
-  "capturedAt": "2026-04-27T22:35:45.122Z"
+  "capturedAt": "2026-04-28T21:07:18.095Z"
 }

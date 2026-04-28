@@ -1,6 +1,6 @@
 # shopmonkey-api-quirks
 
-A small, reproducible test harness that demonstrates three behaviors in the Shopmonkey REST API (`https://api.shopmonkey.cloud/v3`) that diverge from what the public docs at https://shopmonkey.dev/ imply.
+A small, reproducible test harness that demonstrates five behaviors in the Shopmonkey REST API (`https://api.shopmonkey.cloud/v3`) that diverge from what the public docs at https://shopmonkey.dev/ imply.
 
 Assembled by an integration partner running a production sync. Every claim ships with the exact request that produced it, the response counts, and the data we drew the conclusion from. The harness is intentionally minimal: TypeScript, fetch, no test framework. Each test is one short file under `src/tests/`.
 
@@ -11,6 +11,8 @@ Assembled by an integration partner running a production sync. Every claim ships
 | 01 — Non-determinism with sort + filter | 5 identical `GET /v3/order` calls — same `skip`, same `limit`, `orderBy={"id":"asc"}` *(test 02 confirms this is the one orderBy form that works)*, and a working `where={"createdDate":{"gte":...}}` filter — return **5 mostly-disjoint sets**. Min Jaccard close to 0 across pairs. With both a working sort and a working filter applied, identical paginated calls still produce different result sets. |
 | 02 — `orderBy` honored on `id`, ignored on date fields | `orderBy={"id":"asc"}` produces 1–5 alphabetic inversions out of 49 (effectively sorted). The same syntax on `createdDate` produces ≥21/49 inversions; on `updatedDate` ≥21/49. We tested 8 alternative encodings (string forms, hyphen-prefix, JSON `1/-1`, array shapes); none sort the date fields. So this isn't a syntax issue — date fields simply aren't orderable through this endpoint. |
 | 03 — `limit` silently clamped above 100 | The order resource page documents `limit` as type `number` with no maximum. Values 1–100 return exactly that count (`limit=1→1`, `limit=99→99`, `limit=100→100`). `limit=101+` silently clamps to 100 — no `4xx`, no warning header. The cap itself isn't documented anywhere. |
+| 04 — Cursor pagination on `id` is also non-deterministic | The recommended workaround for test 01 is cursor-based pagination on `id` (drop `skip`, keep `orderBy={"id":"asc"}`, page N+1 uses `where: {id: {gt: lastIdOfPageN}}`). Three identical runs of that pattern over 3 pages of 100 return **mostly-disjoint ID sets** (Jaccard ≈ 0.2 across pairs) and disagree on how many records exist past a given cursor (per-run page sizes differ despite identical queries). Whatever underlies test 01 affects cursor pagination too. |
+| 05 — Cursor pagination returns duplicate IDs across pages within a single run | With `orderBy={"id":"asc"}` and each page filtered by `where: {id: {gt: lastIdOfPreviousPage}}`, no ID can correctly appear in more than one page of the same run — the next page's filter excludes everything ≤ the cursor. We observe within-run duplicates (same id returned in page N and a later page) and, in some runs, returned ids that are ≤ the cursor that was passed in. Either the `id: {gt}` filter is not strictly applied or `orderBy={"id":"asc"}` is not producing a strict total order. Either way, safe cursor pagination is not achievable here today. |
 
 Per-test evidence with raw request logs is in `evidence/`.
 
@@ -60,6 +62,8 @@ src/
     01-non-determinism.ts
     02-orderby-and-collate.ts
     03-limit-clamp.ts
+    04-cursor-non-determinism.ts
+    05-cursor-within-run-duplicates.ts
 evidence/              # populated by `pnpm test:all` — one JSON file per test
 .env.example
 ```
