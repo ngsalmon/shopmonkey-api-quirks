@@ -38,10 +38,10 @@
       {
         "a": 1,
         "b": 2,
-        "jaccard": 0.08108108108108109,
-        "aOnly": 85,
-        "bOnly": 85,
-        "common": 15
+        "jaccard": 0.19047619047619047,
+        "aOnly": 68,
+        "bOnly": 68,
+        "common": 32
       },
       {
         "a": 1,
@@ -62,10 +62,10 @@
       {
         "a": 1,
         "b": 5,
-        "jaccard": 0.010101010101010102,
-        "aOnly": 98,
-        "bOnly": 98,
-        "common": 2
+        "jaccard": 0,
+        "aOnly": 100,
+        "bOnly": 100,
+        "common": 0
       },
       {
         "a": 2,
@@ -78,14 +78,22 @@
       {
         "a": 2,
         "b": 4,
-        "jaccard": 0.21212121212121213,
-        "aOnly": 65,
-        "bOnly": 65,
-        "common": 35
+        "jaccard": 0,
+        "aOnly": 100,
+        "bOnly": 100,
+        "common": 0
       },
       {
         "a": 2,
         "b": 5,
+        "jaccard": 0.06382978723404255,
+        "aOnly": 88,
+        "bOnly": 88,
+        "common": 12
+      },
+      {
+        "a": 3,
+        "b": 4,
         "jaccard": 0,
         "aOnly": 100,
         "bOnly": 100,
@@ -93,27 +101,19 @@
       },
       {
         "a": 3,
-        "b": 4,
-        "jaccard": 0.08695652173913043,
-        "aOnly": 84,
-        "bOnly": 84,
-        "common": 16
-      },
-      {
-        "a": 3,
         "b": 5,
-        "jaccard": 0.010101010101010102,
-        "aOnly": 98,
-        "bOnly": 98,
-        "common": 2
+        "jaccard": 0.15606936416184972,
+        "aOnly": 73,
+        "bOnly": 73,
+        "common": 27
       },
       {
         "a": 4,
         "b": 5,
-        "jaccard": 0,
-        "aOnly": 100,
-        "bOnly": 100,
-        "common": 0
+        "jaccard": 0.0989010989010989,
+        "aOnly": 82,
+        "bOnly": 82,
+        "common": 18
       }
     ],
     "minJaccard": 0
@@ -129,7 +129,7 @@
         "where": "{\"createdDate\":{\"gte\":\"2025-01-01T00:00:00Z\"}}"
       },
       "status": 200,
-      "durationMs": 435,
+      "durationMs": 426,
       "responseSummary": {
         "dataLength": 100,
         "metaTotal": 5065,
@@ -146,7 +146,7 @@
         "where": "{\"createdDate\":{\"gte\":\"2025-01-01T00:00:00Z\"}}"
       },
       "status": 200,
-      "durationMs": 293,
+      "durationMs": 272,
       "responseSummary": {
         "dataLength": 100,
         "metaTotal": 5065,
@@ -163,7 +163,7 @@
         "where": "{\"createdDate\":{\"gte\":\"2025-01-01T00:00:00Z\"}}"
       },
       "status": 200,
-      "durationMs": 311,
+      "durationMs": 303,
       "responseSummary": {
         "dataLength": 100,
         "metaTotal": 5065,
@@ -180,7 +180,7 @@
         "where": "{\"createdDate\":{\"gte\":\"2025-01-01T00:00:00Z\"}}"
       },
       "status": 200,
-      "durationMs": 293,
+      "durationMs": 284,
       "responseSummary": {
         "dataLength": 100,
         "metaTotal": 5065,
@@ -197,7 +197,7 @@
         "where": "{\"createdDate\":{\"gte\":\"2025-01-01T00:00:00Z\"}}"
       },
       "status": 200,
-      "durationMs": 264,
+      "durationMs": 325,
       "responseSummary": {
         "dataLength": 100,
         "metaTotal": 5065,
@@ -205,5 +205,5 @@
       }
     }
   ],
-  "capturedAt": "2026-04-28T21:07:12.911Z"
+  "capturedAt": "2026-04-28T22:33:31.305Z"
 }

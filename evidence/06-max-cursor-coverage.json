@@ -1,0 +1,173 @@
+{
+  "id": "06-max-cursor-coverage",
+  "title": "Even MAX-cursor pagination (strictly correct cursor pagination) returns mostly-disjoint subsets of a larger universe across runs",
+  "hypothesis": "Test 05 isolated the cause of cursor pagination duplicates: `orderBy={\"id\":\"asc\"}` is not strict, so the LAST id of a page is not always the max. The fix should be to compute the MAX id of each page client-side and use *that* as the cursor — by construction this produces zero within-run duplicates. We further expect that, against a bounded universe (createdDate filter), three identical MAX-cursor pagination runs should return the same set of ids. Instead, runs return mostly-disjoint id sets and each run typically exits pagination after ~100 ids (page 2 often returns 0–5 records), even though across runs we see substantially more distinct ids. The API non-deterministically picks ~100 ids from a larger universe and then signals \"no more results\" — meaning a single sync run drops a large fraction of records that exist, with no client-side pagination strategy able to recover them.",
+  "summary": "3 runs of MAX-cursor pagination (orderBy={\"id\":\"asc\"}, page N+1 uses where={id:{gt: client-computed MAX of page N}}, createdDate>=2026-04-15T00:00:00Z). Each run produced 0 within-run duplicates (as expected by construction). But the runs disagreed on coverage: union=175 ids, intersection=40, smallest run=104, largest run=110. The smallest run missed 71 of the 175 ids that exist (40.6%). Min cross-run Jaccard = 0.373. Page sizes per run: run1=[100,7], run2=[100,10], run3=[100,4] — pagination exits early (page 2 often returns 0–few records) even though the universe is larger.",
+  "evidence": {
+    "endpoint": "GET /v3/order",
+    "pattern": "MAX-cursor: orderBy={\"id\":\"asc\"}, page N+1 uses where={id:{gt: client-computed MAX of page N}}",
+    "sinceFilter": "2026-04-15T00:00:00Z",
+    "pageSize": 100,
+    "maxPages": 5,
+    "runs": [
+      {
+        "run": 1,
+        "totalIds": 107,
+        "uniqueIds": 107,
+        "pageSizes": [
+          100,
+          7
+        ]
+      },
+      {
+        "run": 2,
+        "totalIds": 110,
+        "uniqueIds": 110,
+        "pageSizes": [
+          100,
+          10
+        ]
+      },
+      {
+        "run": 3,
+        "totalIds": 104,
+        "uniqueIds": 104,
+        "pageSizes": [
+          100,
+          4
+        ]
+      }
+    ],
+    "coverage": {
+      "unionSize": 175,
+      "intersectionSize": 40,
+      "smallestRunSize": 104,
+      "largestRunSize": 110,
+      "recordsMissedBySmallestRun": 71,
+      "smallestRunCoveragePct": 59.42857142857143
+    },
+    "pairwiseJaccard": [
+      {
+        "a": 1,
+        "b": 2,
+        "jaccard": 0.37341772151898733,
+        "common": 59,
+        "union": 158
+      },
+      {
+        "a": 1,
+        "b": 3,
+        "jaccard": 0.4755244755244755,
+        "common": 68,
+        "union": 143
+      },
+      {
+        "a": 2,
+        "b": 3,
+        "jaccard": 0.38064516129032255,
+        "common": 59,
+        "union": 155
+      }
+    ],
+    "minJaccard": 0.37341772151898733
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "orderBy": "{\"id\":\"asc\"}",
+        "where": "{\"createdDate\":{\"gte\":\"2026-04-15T00:00:00Z\"}}"
+      },
+      "status": 200,
+      "durationMs": 250,
+      "responseSummary": {
+        "dataLength": 100,
+        "metaTotal": 266,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "orderBy": "{\"id\":\"asc\"}",
+        "where": "{\"createdDate\":{\"gte\":\"2026-04-15T00:00:00Z\"},\"id\":{\"gt\":\"f76a1d1c-a2ca-430b-bda6-0b0bd9436335\"}}"
+      },
+      "status": 200,
+      "durationMs": 147,
+      "responseSummary": {
+        "dataLength": 7,
+        "metaTotal": 7,
+        "metaHasMore": false
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "orderBy": "{\"id\":\"asc\"}",
+        "where": "{\"createdDate\":{\"gte\":\"2026-04-15T00:00:00Z\"}}"
+      },
+      "status": 200,
+      "durationMs": 302,
+      "responseSummary": {
+        "dataLength": 100,
+        "metaTotal": 266,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "orderBy": "{\"id\":\"asc\"}",
+        "where": "{\"createdDate\":{\"gte\":\"2026-04-15T00:00:00Z\"},\"id\":{\"gt\":\"f3adeb5e-7d67-4c76-991a-9a074c592d7c\"}}"
+      },
+      "status": 200,
+      "durationMs": 141,
+      "responseSummary": {
+        "dataLength": 10,
+        "metaTotal": 10,
+        "metaHasMore": false
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "orderBy": "{\"id\":\"asc\"}",
+        "where": "{\"createdDate\":{\"gte\":\"2026-04-15T00:00:00Z\"}}"
+      },
+      "status": 200,
+      "durationMs": 278,
+      "responseSummary": {
+        "dataLength": 100,
+        "metaTotal": 266,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "orderBy": "{\"id\":\"asc\"}",
+        "where": "{\"createdDate\":{\"gte\":\"2026-04-15T00:00:00Z\"},\"id\":{\"gt\":\"fbb4c803-8a29-429e-aca5-aa93338a1dad\"}}"
+      },
+      "status": 200,
+      "durationMs": 142,
+      "responseSummary": {
+        "dataLength": 4,
+        "metaTotal": 4,
+        "metaHasMore": false
+      }
+    }
+  ],
+  "capturedAt": "2026-04-28T22:33:43.425Z"
+}

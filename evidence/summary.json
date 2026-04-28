@@ -1,10 +1,35 @@
 {
-  "generatedAt": "2026-04-28T21:08:24.784Z",
+  "generatedAt": "2026-04-28T22:33:43.426Z",
   "results": [
+    {
+      "id": "01-non-determinism",
+      "title": "REST list endpoints return non-deterministic results across identical calls — even with `orderBy` on a sortable field and a `gte` filter",
+      "summary": "Min Jaccard across 10 pairs = 0.000 (1.0 means identical sets). Identical calls — same skip/limit, working orderBy on id, working `gte` filter on createdDate — returned different ID sets."
+    },
+    {
+      "id": "02-orderby-and-collate",
+      "title": "`orderBy` is honored on `id` but ignored on `createdDate` and `updatedDate`",
+      "summary": "orderBy={\"id\":\"asc\"} produced 3/49 alphabetic inversions on UUIDs (effectively sorted). Same syntax on createdDate: ≥21/49 inversions across 8 encodings. On updatedDate: ≥22/49 inversions across 8 encodings. Neither date field is orderable. collate=true on createdDate: 26 inversions."
+    },
+    {
+      "id": "03-limit-clamp",
+      "title": "`limit` parameter silently clamped at 100",
+      "summary": "Requested limit=500, received 100 rows (clamped to 100). No 4xx, no warning header."
+    },
     {
       "id": "04-cursor-non-determinism",
       "title": "Cursor pagination on `id` (the recommended workaround for skip+limit) is also non-deterministic",
-      "summary": "3 runs of cursor pagination (orderBy={\"id\":\"asc\"}, no skip, page 2+ uses where={id:{gt:lastIdOfPrevPage}}) returned mostly-disjoint ID sets across runs. Min Jaccard = 0.053 across 3 pairs. Per-run page sizes were uniform (run1=100/100/100, run2=100/100/100, run3=100/100/100); the non-determinism is in *which* ids each run returns, not how many."
+      "summary": "3 runs of cursor pagination (orderBy={\"id\":\"asc\"}, no skip, page 2+ uses where={id:{gt:lastIdOfPrevPage}}) returned mostly-disjoint ID sets across runs. Min Jaccard = 0.096 across 3 pairs. Per-run page sizes also differed despite identical queries: run1=100/100/100, run2=100/54, run3=100/100/61."
+    },
+    {
+      "id": "05-cursor-within-run-duplicates",
+      "title": "Cursor pagination on `id` returns duplicate IDs across pages within a single run",
+      "summary": "Across 3 independent cursor paginations of 4 pages each, 3/3 runs produced duplicate IDs across pages — 224 duplicate ids in total. 0 returned ids violated the cursor invariant outright (id ≤ the cursor passed in to that page's where filter). With orderBy={\"id\":\"asc\"} and where={id:{gt:lastId}}, no id should appear in more than one page of the same run."
+    },
+    {
+      "id": "06-max-cursor-coverage",
+      "title": "Even MAX-cursor pagination (strictly correct cursor pagination) returns mostly-disjoint subsets of a larger universe across runs",
+      "summary": "3 runs of MAX-cursor pagination (orderBy={\"id\":\"asc\"}, page N+1 uses where={id:{gt: client-computed MAX of page N}}, createdDate>=2026-04-15T00:00:00Z). Each run produced 0 within-run duplicates (as expected by construction). But the runs disagreed on coverage: union=175 ids, intersection=40, smallest run=104, largest run=110. The smallest run missed 71 of the 175 ids that exist (40.6%). Min cross-run Jaccard = 0.373. Page sizes per run: run1=[100,7], run2=[100,10], run3=[100,4] — pagination exits early (page 2 often returns 0–few records) even though the universe is larger."
     }
   ]
 }

@@ -2,7 +2,7 @@
   "id": "04-cursor-non-determinism",
   "title": "Cursor pagination on `id` (the recommended workaround for skip+limit) is also non-deterministic",
   "hypothesis": "Three identical runs of cursor pagination on /v3/order — `orderBy={\"id\":\"asc\"}`, `limit=100`, no `skip`, page N+1 uses `where: {id: {gt: lastIdOfPageN}}` — should each return the same union of IDs and the same page sizes. Instead the three runs return mostly-disjoint ID sets (Jaccard well below 1.0) and even disagree on how many records exist past a given cursor (page sizes differ run-to-run despite identical queries). The non-determinism that test 01 demonstrates for `skip+limit` is not avoided by switching to id-cursor pagination.",
-  "summary": "3 runs of cursor pagination (orderBy={\"id\":\"asc\"}, no skip, page 2+ uses where={id:{gt:lastIdOfPrevPage}}) returned mostly-disjoint ID sets across runs. Min Jaccard = 0.053 across 3 pairs. Per-run page sizes were uniform (run1=100/100/100, run2=100/100/100, run3=100/100/100); the non-determinism is in *which* ids each run returns, not how many.",
+  "summary": "3 runs of cursor pagination (orderBy={\"id\":\"asc\"}, no skip, page 2+ uses where={id:{gt:lastIdOfPrevPage}}) returned mostly-disjoint ID sets across runs. Min Jaccard = 0.096 across 3 pairs. Per-run page sizes also differed despite identical queries: run1=100/100/100, run2=100/54, run3=100/100/61.",
   "evidence": {
     "endpoint": "GET /v3/order",
     "pattern": "cursor: orderBy={\"id\":\"asc\"}, no skip, page 2+ uses where={id:{gt:lastIdOfPrevPage}}",
@@ -12,7 +12,7 @@
       {
         "run": 1,
         "totalIds": 300,
-        "uniqueIds": 244,
+        "uniqueIds": 233,
         "pageSizes": [
           100,
           100,
@@ -21,22 +21,21 @@
       },
       {
         "run": 2,
-        "totalIds": 300,
-        "uniqueIds": 256,
+        "totalIds": 154,
+        "uniqueIds": 130,
         "pageSizes": [
           100,
-          100,
-          100
+          54
         ]
       },
       {
         "run": 3,
-        "totalIds": 300,
-        "uniqueIds": 262,
+        "totalIds": 261,
+        "uniqueIds": 259,
         "pageSizes": [
           100,
           100,
-          100
+          61
         ]
       }
     ],
@@ -44,29 +43,29 @@
       {
         "a": 1,
         "b": 2,
-        "jaccard": 0.10375275938189846,
-        "common": 47,
-        "aOnly": 197,
-        "bOnly": 209
+        "jaccard": 0.11692307692307692,
+        "common": 38,
+        "aOnly": 195,
+        "bOnly": 92
       },
       {
         "a": 1,
         "b": 3,
-        "jaccard": 0.12694877505567928,
-        "common": 57,
-        "aOnly": 187,
-        "bOnly": 205
+        "jaccard": 0.0957683741648107,
+        "common": 43,
+        "aOnly": 190,
+        "bOnly": 216
       },
       {
         "a": 2,
         "b": 3,
-        "jaccard": 0.052845528455284556,
-        "common": 26,
-        "aOnly": 230,
-        "bOnly": 236
+        "jaccard": 0.2671009771986971,
+        "common": 82,
+        "aOnly": 48,
+        "bOnly": 177
       }
     ],
-    "minJaccard": 0.052845528455284556
+    "minJaccard": 0.0957683741648107
   },
   "requests": [
     {
@@ -77,7 +76,7 @@
         "orderBy": "{\"id\":\"asc\"}"
       },
       "status": 200,
-      "durationMs": 363,
+      "durationMs": 269,
       "responseSummary": {
         "dataLength": 100,
         "metaTotal": 5743,
@@ -90,13 +89,13 @@
       "query": {
         "limit": "100",
         "orderBy": "{\"id\":\"asc\"}",
-        "where": "{\"id\":{\"gt\":\"d6586e17-e452-432b-8f71-404a13e35d13\"}}"
+        "where": "{\"id\":{\"gt\":\"a78c22fe-f941-4212-ae0e-d115b3177591\"}}"
       },
       "status": 200,
-      "durationMs": 226,
+      "durationMs": 228,
       "responseSummary": {
         "dataLength": 100,
-        "metaTotal": 935,
+        "metaTotal": 1950,
         "metaHasMore": true
       }
     },
@@ -106,13 +105,13 @@
       "query": {
         "limit": "100",
         "orderBy": "{\"id\":\"asc\"}",
-        "where": "{\"id\":{\"gt\":\"fb176060-b066-4625-8aa1-eb283011b2d8\"}}"
+        "where": "{\"id\":{\"gt\":\"c204530d-15a2-4170-b8a9-b55edb889740\"}}"
       },
       "status": 200,
-      "durationMs": 217,
+      "durationMs": 233,
       "responseSummary": {
         "dataLength": 100,
-        "metaTotal": 113,
+        "metaTotal": 1363,
         "metaHasMore": true
       }
     },
@@ -124,7 +123,7 @@
         "orderBy": "{\"id\":\"asc\"}"
       },
       "status": 200,
-      "durationMs": 256,
+      "durationMs": 284,
       "responseSummary": {
         "dataLength": 100,
         "metaTotal": 5743,
@@ -137,30 +136,14 @@
       "query": {
         "limit": "100",
         "orderBy": "{\"id\":\"asc\"}",
-        "where": "{\"id\":{\"gt\":\"66893284-97dd-4c86-94bc-70b5e0b3405c\"}}"
+        "where": "{\"id\":{\"gt\":\"fd728d0a-9062-40d4-b128-a34ea39e43b2\"}}"
       },
       "status": 200,
-      "durationMs": 270,
+      "durationMs": 195,
       "responseSummary": {
-        "dataLength": 100,
-        "metaTotal": 3390,
-        "metaHasMore": true
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/order",
-      "query": {
-        "limit": "100",
-        "orderBy": "{\"id\":\"asc\"}",
-        "where": "{\"id\":{\"gt\":\"b666cdef-d0c9-46ec-b491-d37c0dd65f3c\"}}"
-      },
-      "status": 200,
-      "durationMs": 230,
-      "responseSummary": {
-        "dataLength": 100,
-        "metaTotal": 1624,
-        "metaHasMore": true
+        "dataLength": 54,
+        "metaTotal": 54,
+        "metaHasMore": false
       }
     },
     {
@@ -171,7 +154,7 @@
         "orderBy": "{\"id\":\"asc\"}"
       },
       "status": 200,
-      "durationMs": 330,
+      "durationMs": 263,
       "responseSummary": {
         "dataLength": 100,
         "metaTotal": 5743,
@@ -184,13 +167,13 @@
       "query": {
         "limit": "100",
         "orderBy": "{\"id\":\"asc\"}",
-        "where": "{\"id\":{\"gt\":\"ecfdd199-3dd6-4a2d-8498-c08056d3735a\"}}"
+        "where": "{\"id\":{\"gt\":\"919ce77f-03b2-4504-b257-37c1dac9c3df\"}}"
       },
       "status": 200,
-      "durationMs": 268,
+      "durationMs": 241,
       "responseSummary": {
         "dataLength": 100,
-        "metaTotal": 429,
+        "metaTotal": 2445,
         "metaHasMore": true
       }
     },
@@ -200,16 +183,16 @@
       "query": {
         "limit": "100",
         "orderBy": "{\"id\":\"asc\"}",
-        "where": "{\"id\":{\"gt\":\"f6b3be2a-990c-4840-bd40-1764728a7765\"}}"
+        "where": "{\"id\":{\"gt\":\"fd1905db-9765-4795-8227-9a9e8799c5d0\"}}"
       },
       "status": 200,
-      "durationMs": 220,
+      "durationMs": 213,
       "responseSummary": {
-        "dataLength": 100,
-        "metaTotal": 214,
-        "metaHasMore": true
+        "dataLength": 61,
+        "metaTotal": 61,
+        "metaHasMore": false
       }
     }
   ],
-  "capturedAt": "2026-04-28T21:08:24.783Z"
+  "capturedAt": "2026-04-28T22:33:38.534Z"
 }

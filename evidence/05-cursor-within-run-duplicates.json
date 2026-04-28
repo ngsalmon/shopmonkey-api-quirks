@@ -2,7 +2,7 @@
   "id": "05-cursor-within-run-duplicates",
   "title": "Cursor pagination on `id` returns duplicate IDs across pages within a single run",
   "hypothesis": "When paginating /v3/order with `orderBy={\"id\":\"asc\"}` and each successive page filtered with `where: {id: {gt: lastIdOfPreviousPage}}`, every returned ID must be strictly greater than every ID in earlier pages — so no ID can appear twice in the same run. We observe within-run duplicates (an ID returned in page N also returned in page N+1 or later). That requires either (a) the `where: {id: {gt: X}}` filter is not strictly applied, or (b) `orderBy={\"id\":\"asc\"}` is not producing a strict total order. Either way, safe cursor pagination is not achievable against this endpoint as currently implemented. We run 3 independent paginations and aggregate evidence so the test reproduces even when individual runs happen to be clean.",
-  "summary": "Across 3 independent cursor paginations of 4 pages each, 3/3 runs produced duplicate IDs across pages — 186 duplicate ids in total. 0 returned ids violated the cursor invariant outright (id ≤ the cursor passed in to that page's where filter). With orderBy={\"id\":\"asc\"} and where={id:{gt:lastId}}, no id should appear in more than one page of the same run.",
+  "summary": "Across 3 independent cursor paginations of 4 pages each, 3/3 runs produced duplicate IDs across pages — 224 duplicate ids in total. 0 returned ids violated the cursor invariant outright (id ≤ the cursor passed in to that page's where filter). With orderBy={\"id\":\"asc\"} and where={id:{gt:lastId}}, no id should appear in more than one page of the same run.",
   "evidence": {
     "endpoint": "GET /v3/order",
     "pattern": "cursor: orderBy={\"id\":\"asc\"}, no skip, page 2+ uses where={id:{gt:lastIdOfPrevPage}}",
@@ -12,40 +12,40 @@
       {
         "run": 1,
         "totalIds": 400,
-        "uniqueIds": 311,
-        "duplicateIdCount": 77,
+        "uniqueIds": 324,
+        "duplicateIdCount": 64,
         "cursorInvariantViolations": 0,
         "sampleDuplicateIds": [
           {
-            "id": "id:a82683652f5d",
+            "id": "id:ce9c55315203",
             "pages": [
               1,
               2
             ]
           },
           {
-            "id": "id:960dd389ce47",
+            "id": "id:b8c64434f6be",
             "pages": [
               1,
               2
             ]
           },
           {
-            "id": "id:476b8bd64173",
+            "id": "id:74116871a5c8",
             "pages": [
               1,
               2
             ]
           },
           {
-            "id": "id:4ddcb1ea41bb",
+            "id": "id:21a00094d274",
             "pages": [
               1,
               2
             ]
           },
           {
-            "id": "id:d419ee4b8748",
+            "id": "id:e5c2c2bbef2e",
             "pages": [
               1,
               2
@@ -56,48 +56,49 @@
       },
       {
         "run": 2,
-        "totalIds": 400,
-        "uniqueIds": 263,
-        "duplicateIdCount": 91,
+        "totalIds": 347,
+        "uniqueIds": 246,
+        "duplicateIdCount": 65,
         "cursorInvariantViolations": 0,
         "sampleDuplicateIds": [
           {
-            "id": "id:a7f5a6d1d33b",
+            "id": "id:24d8e3bb5fc1",
             "pages": [
               1,
-              2
+              2,
+              3
             ]
           },
           {
-            "id": "id:733169791eb1",
+            "id": "id:c84ef34e3017",
             "pages": [
               1,
-              3,
-              4
+              2,
+              3
             ]
           },
           {
-            "id": "id:022f507e63d4",
+            "id": "id:2d31e71d8c79",
             "pages": [
               1,
-              3,
-              4
+              2,
+              3
             ]
           },
           {
-            "id": "id:745d841f80c5",
+            "id": "id:62a0958f2ae2",
             "pages": [
               1,
-              3,
-              4
+              2,
+              3
             ]
           },
           {
-            "id": "id:4618f4b9ed3e",
+            "id": "id:64b247670da6",
             "pages": [
               1,
-              3,
-              4
+              2,
+              3
             ]
           }
         ],
@@ -105,44 +106,50 @@
       },
       {
         "run": 3,
-        "totalIds": 332,
-        "uniqueIds": 314,
-        "duplicateIdCount": 18,
+        "totalIds": 400,
+        "uniqueIds": 257,
+        "duplicateIdCount": 95,
         "cursorInvariantViolations": 0,
         "sampleDuplicateIds": [
           {
-            "id": "id:9d09caa81663",
+            "id": "id:ce9c55315203",
             "pages": [
               1,
               2
             ]
           },
           {
-            "id": "id:705220d97f16",
+            "id": "id:b8c64434f6be",
             "pages": [
               1,
               2
             ]
           },
           {
-            "id": "id:5a6308a78c7d",
+            "id": "id:24d8e3bb5fc1",
             "pages": [
               1,
-              2
+              2,
+              3,
+              4
             ]
           },
           {
-            "id": "id:5f49daf00ef7",
+            "id": "id:c84ef34e3017",
             "pages": [
               1,
-              2
+              2,
+              3,
+              4
             ]
           },
           {
-            "id": "id:f3ccdc3366fe",
+            "id": "id:2d31e71d8c79",
             "pages": [
               1,
-              2
+              2,
+              3,
+              4
             ]
           }
         ],
@@ -160,17 +167,17 @@
           },
           {
             "page": 2,
-            "cursorAfter": "id:5f5f096de3c7",
+            "cursorAfter": "id:7390e12229d2",
             "returned": 100
           },
           {
             "page": 3,
-            "cursorAfter": "id:6ff81a97231e",
+            "cursorAfter": "id:c395ece5ddbc",
             "returned": 100
           },
           {
             "page": 4,
-            "cursorAfter": "id:f17a7c118964",
+            "cursorAfter": "id:6b6da536aace",
             "returned": 100
           }
         ]
@@ -185,18 +192,18 @@
           },
           {
             "page": 2,
-            "cursorAfter": "id:b70f13349842",
+            "cursorAfter": "id:d8e3ececb512",
             "returned": 100
           },
           {
             "page": 3,
-            "cursorAfter": "id:e83fbeb7d75a",
+            "cursorAfter": "id:e25b3cbe57ce",
             "returned": 100
           },
           {
             "page": 4,
-            "cursorAfter": "id:4fda72339373",
-            "returned": 100
+            "cursorAfter": "id:45427504f1f5",
+            "returned": 47
           }
         ]
       },
@@ -210,25 +217,25 @@
           },
           {
             "page": 2,
-            "cursorAfter": "id:978c75ee6193",
+            "cursorAfter": "id:4640827588ec",
             "returned": 100
           },
           {
             "page": 3,
-            "cursorAfter": "id:e5c2c2bbef2e",
+            "cursorAfter": "id:e83fbeb7d75a",
             "returned": 100
           },
           {
             "page": 4,
-            "cursorAfter": "id:bb0e53d695d2",
-            "returned": 32
+            "cursorAfter": "id:4fda72339373",
+            "returned": 100
           }
         ]
       }
     ],
     "totals": {
       "runsWithDuplicates": 3,
-      "duplicateIds": 186,
+      "duplicateIds": 224,
       "cursorInvariantViolations": 0
     }
   },
@@ -241,7 +248,7 @@
         "orderBy": "{\"id\":\"asc\"}"
       },
       "status": 200,
-      "durationMs": 273,
+      "durationMs": 307,
       "responseSummary": {
         "dataLength": 100,
         "metaTotal": 5743,
@@ -254,13 +261,13 @@
       "query": {
         "limit": "100",
         "orderBy": "{\"id\":\"asc\"}",
-        "where": "{\"id\":{\"gt\":\"dc884df6-9e79-4f6a-91c5-c6dd0efd3dcd\"}}"
+        "where": "{\"id\":{\"gt\":\"bdf0fb9c-52c8-4711-9d36-6419eb050fae\"}}"
       },
       "status": 200,
-      "durationMs": 234,
+      "durationMs": 279,
       "responseSummary": {
         "dataLength": 100,
-        "metaTotal": 807,
+        "metaTotal": 1464,
         "metaHasMore": true
       }
     },
@@ -270,13 +277,13 @@
       "query": {
         "limit": "100",
         "orderBy": "{\"id\":\"asc\"}",
-        "where": "{\"id\":{\"gt\":\"f0cdddb3-8178-4b08-a295-0a150dc34b73\"}}"
+        "where": "{\"id\":{\"gt\":\"d3ed381e-0a6d-4cd5-a54d-d5ca3b9cc983\"}}"
       },
       "status": 200,
-      "durationMs": 224,
+      "durationMs": 343,
       "responseSummary": {
         "dataLength": 100,
-        "metaTotal": 337,
+        "metaTotal": 987,
         "metaHasMore": true
       }
     },
@@ -286,13 +293,13 @@
       "query": {
         "limit": "100",
         "orderBy": "{\"id\":\"asc\"}",
-        "where": "{\"id\":{\"gt\":\"f5c38c1b-0364-49c0-b53c-0ef8606c6d4d\"}}"
+        "where": "{\"id\":{\"gt\":\"f96e1ea1-35b6-4e5f-9ab1-0d42b688b3b0\"}}"
       },
       "status": 200,
-      "durationMs": 204,
+      "durationMs": 250,
       "responseSummary": {
         "dataLength": 100,
-        "metaTotal": 230,
+        "metaTotal": 154,
         "metaHasMore": true
       }
     },
@@ -304,7 +311,7 @@
         "orderBy": "{\"id\":\"asc\"}"
       },
       "status": 200,
-      "durationMs": 280,
+      "durationMs": 261,
       "responseSummary": {
         "dataLength": 100,
         "metaTotal": 5743,
@@ -317,13 +324,76 @@
       "query": {
         "limit": "100",
         "orderBy": "{\"id\":\"asc\"}",
-        "where": "{\"id\":{\"gt\":\"d8d0bbd9-43f7-4283-9145-9f41f7a76682\"}}"
+        "where": "{\"id\":{\"gt\":\"f5c08adc-dd14-4950-844a-3a558fc7a184\"}}"
       },
       "status": 200,
-      "durationMs": 245,
+      "durationMs": 213,
       "responseSummary": {
         "dataLength": 100,
-        "metaTotal": 882,
+        "metaTotal": 231,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "orderBy": "{\"id\":\"asc\"}",
+        "where": "{\"id\":{\"gt\":\"fb792570-478d-4d4c-801f-e86946b78d13\"}}"
+      },
+      "status": 200,
+      "durationMs": 216,
+      "responseSummary": {
+        "dataLength": 100,
+        "metaTotal": 104,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "orderBy": "{\"id\":\"asc\"}",
+        "where": "{\"id\":{\"gt\":\"fdd53da7-28a5-42bc-9b5c-6ccdaa3c4820\"}}"
+      },
+      "status": 200,
+      "durationMs": 188,
+      "responseSummary": {
+        "dataLength": 47,
+        "metaTotal": 47,
+        "metaHasMore": false
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "orderBy": "{\"id\":\"asc\"}"
+      },
+      "status": 200,
+      "durationMs": 276,
+      "responseSummary": {
+        "dataLength": 100,
+        "metaTotal": 5743,
+        "metaHasMore": true
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/order",
+      "query": {
+        "limit": "100",
+        "orderBy": "{\"id\":\"asc\"}",
+        "where": "{\"id\":{\"gt\":\"dfe39e82-ba83-4812-a945-4e1df0db5319\"}}"
+      },
+      "status": 200,
+      "durationMs": 243,
+      "responseSummary": {
+        "dataLength": 100,
+        "metaTotal": 728,
         "metaHasMore": true
       }
     },
@@ -336,7 +406,7 @@
         "where": "{\"id\":{\"gt\":\"f95bf70f-98f2-4948-957f-2e5ef244d965\"}}"
       },
       "status": 200,
-      "durationMs": 223,
+      "durationMs": 232,
       "responseSummary": {
         "dataLength": 100,
         "metaTotal": 156,
@@ -352,76 +422,13 @@
         "where": "{\"id\":{\"gt\":\"fa5ec60a-7461-4982-bd10-604e45a5dfe2\"}}"
       },
       "status": 200,
-      "durationMs": 225,
+      "durationMs": 237,
       "responseSummary": {
         "dataLength": 100,
         "metaTotal": 133,
         "metaHasMore": true
       }
-    },
-    {
-      "method": "GET",
-      "path": "/order",
-      "query": {
-        "limit": "100",
-        "orderBy": "{\"id\":\"asc\"}"
-      },
-      "status": 200,
-      "durationMs": 319,
-      "responseSummary": {
-        "dataLength": 100,
-        "metaTotal": 5743,
-        "metaHasMore": true
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/order",
-      "query": {
-        "limit": "100",
-        "orderBy": "{\"id\":\"asc\"}",
-        "where": "{\"id\":{\"gt\":\"5e35ebd5-08e2-4dc6-ad29-514547563f97\"}}"
-      },
-      "status": 200,
-      "durationMs": 299,
-      "responseSummary": {
-        "dataLength": 100,
-        "metaTotal": 3598,
-        "metaHasMore": true
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/order",
-      "query": {
-        "limit": "100",
-        "orderBy": "{\"id\":\"asc\"}",
-        "where": "{\"id\":{\"gt\":\"bed1b4bf-6437-488f-9a38-dd48a4128b6b\"}}"
-      },
-      "status": 200,
-      "durationMs": 235,
-      "responseSummary": {
-        "dataLength": 100,
-        "metaTotal": 1440,
-        "metaHasMore": true
-      }
-    },
-    {
-      "method": "GET",
-      "path": "/order",
-      "query": {
-        "limit": "100",
-        "orderBy": "{\"id\":\"asc\"}",
-        "where": "{\"id\":{\"gt\":\"fe5158bb-8dac-4460-a607-40dbb1f2b900\"}}"
-      },
-      "status": 200,
-      "durationMs": 198,
-      "responseSummary": {
-        "dataLength": 32,
-        "metaTotal": 32,
-        "metaHasMore": false
-      }
     }
   ],
-  "capturedAt": "2026-04-28T21:07:24.023Z"
+  "capturedAt": "2026-04-28T22:33:41.902Z"
 }

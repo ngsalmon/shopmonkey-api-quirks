@@ -1,6 +1,6 @@
 # shopmonkey-api-quirks
 
-A small, reproducible test harness that demonstrates five behaviors in the Shopmonkey REST API (`https://api.shopmonkey.cloud/v3`) that diverge from what the public docs at https://shopmonkey.dev/ imply.
+A small, reproducible test harness that demonstrates six behaviors in the Shopmonkey REST API (`https://api.shopmonkey.cloud/v3`) that diverge from what the public docs at https://shopmonkey.dev/ imply.
 
 Assembled by an integration partner running a production sync. Every claim ships with the exact request that produced it, the response counts, and the data we drew the conclusion from. The harness is intentionally minimal: TypeScript, fetch, no test framework. Each test is one short file under `src/tests/`.
 
@@ -13,6 +13,7 @@ Assembled by an integration partner running a production sync. Every claim ships
 | 03 — `limit` silently clamped above 100 | The order resource page documents `limit` as type `number` with no maximum. Values 1–100 return exactly that count (`limit=1→1`, `limit=99→99`, `limit=100→100`). `limit=101+` silently clamps to 100 — no `4xx`, no warning header. The cap itself isn't documented anywhere. |
 | 04 — Cursor pagination on `id` is also non-deterministic | The recommended workaround for test 01 is cursor-based pagination on `id` (drop `skip`, keep `orderBy={"id":"asc"}`, page N+1 uses `where: {id: {gt: lastIdOfPageN}}`). Three identical runs of that pattern over 3 pages of 100 return **mostly-disjoint ID sets** — pairwise Jaccard ≈ 0.05–0.20 across runs. Some runs also disagree on how many records exist past a given cursor (page sizes vary), though not in every run. Whatever underlies test 01 affects cursor pagination too. |
 | 05 — Cursor pagination returns duplicate IDs across pages within a single run | With `orderBy={"id":"asc"}` and each page filtered by `where: {id: {gt: lastIdOfPreviousPage}}`, no ID can correctly appear in more than one page of the same run — the next page's filter excludes everything ≤ the cursor. We observe within-run duplicates anyway (same id returned in page N and a later page). The returned IDs **do** all satisfy `id > cursor` — the `gt` filter itself is honored — which narrows the root cause: `orderBy={"id":"asc"}` is not producing a strict total order, so the last id of page N is not always the maximum, and page N+1's `id > lastId` legitimately readmits ids that already appeared. Either way, safe cursor pagination is not achievable here today. |
+| 06 — Even strictly correct (MAX-id) cursor pagination drops records non-deterministically | The obvious fix to test 05 is to compute the MAX id of each page client-side and use that as the cursor — by construction this gives zero within-run duplicates. We tested it. Three identical runs against a bounded universe (`createdDate >= 2026-04-15`) produced 0 within-run dups (good) but each run returned only ~100 ids while the union across runs was 170+ — the smallest run **missed 41% of the records that exist**. Pagination exits early after page 1 (page 2 routinely returns 0–5 records), even though across runs we can prove the universe holds substantially more. The API non-deterministically picks ~100 ids from a larger universe and signals "no more results"; no client-side pagination strategy can recover the dropped records on its own. |
 
 Per-test evidence with raw request logs is in `evidence/`.
 
@@ -64,6 +65,7 @@ src/
     03-limit-clamp.ts
     04-cursor-non-determinism.ts
     05-cursor-within-run-duplicates.ts
+    06-max-cursor-coverage.ts
 evidence/              # populated by `pnpm test:all` — one JSON file per test
 .env.example
 ```

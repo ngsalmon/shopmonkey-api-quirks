@@ -17,7 +17,7 @@
         "limit": "500"
       },
       "status": 200,
-      "durationMs": 267,
+      "durationMs": 277,
       "responseSummary": {
         "dataLength": 100,
         "metaTotal": 5743,
@@ -25,5 +25,5 @@
       }
     }
   ],
-  "capturedAt": "2026-04-28T21:07:18.378Z"
+  "capturedAt": "2026-04-28T22:33:36.424Z"
 }
